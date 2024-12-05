@@ -2,13 +2,13 @@
 ================
 
 Deepend is a suite of dynamic storage pools with subpool capabilities
-for Ada 95, Ada 2005, and Ada 2012. The Deepend storage pools were
-designed to provide efficient concurrency for use in both single core
-and multicore environments. The Deepend pools also provide flexibility
-such that the storage for the pools may be placed entirely in static
-memory, on the stack, or on the heap, or in various combinations of the
-above (See the Bounded Pools below for more details on how this can be
-applied).
+for Ada 95, Ada 2005, Ada 2012, and Ada 2022. The Deepend storage pools
+were designed to provide efficient concurrency for use in both single
+core and multicore environments. The Deepend pools also provide
+flexibility such that the storage for the pools may be placed entirely
+in static memory, on the stack, or on the heap, or in various combinations
+of the above (See the Bounded Pools below for more details on how this
+can be applied).
 
 Further, Deepend ensures that each pool and subpool is "owned" by a
 single Ada task, and thus only that task may allocate objects from a
@@ -100,7 +100,7 @@ There are 4 Storage Pool packages to choose from in Deepend.
   is fully allocated to objects and further objects are allocated,
   then another block of storage is allocated to the subpool, and further
   allocations to that subpool are carved out of that new storage block.
-  
+
   The Bounded_Dynamic_Pools package has subpool capabilities where the
   storage in each Subpool object is bounded, and the number of subpools
   that may be allocated is also bounded. If the Subpool is fully
@@ -141,7 +141,7 @@ There are 4 Storage Pool packages to choose from in Deepend.
   whether the storage for the pool resides on the heap or on the stack,
   or statically at library level.
 
-  In Ada 2012, the new subpool allocation syntax may also be used with
+  In Ada 2012 and later, the new allocation syntax may also be used with
   Dynamic_Pools and Bounded_Dynamic_Pools in order to specify the
   subpool that will contain the allocated objects.
 
@@ -156,16 +156,17 @@ There are 4 Storage Pool packages to choose from in Deepend.
   allocated to any subpool. Only task types or types that have tasks
   cannot be allocated to a subpool in Ada 2012.
 
-  In addition, for Ada 95, Ada 2005, and Ada 2012, the "new" keyword may
-  be used with all the subpool packages without specifying a subpool,
-  which results in an object being allocated to the default subpool for
-  the storage pool.
+  In addition, for Ada 95, Ada 2005, Ada 2012, and Ada 2022, the "new"
+  keyword may be used with all the subpool packages without specifying a
+  subpool, which results in an object being allocated to the default
+  subpool for the storage pool.
+
   Note: Using the "new" syntax allows one to allocate objects of limited
   types to the default subpool of the pool for Ada 95, and Ada 2005, as
-  otherwise the Allocate generics would not allow this. In Ada 2012, one
-  can not only allocate objects of limited types to the default subpool,
-  but one also allocate objects of limited types to any subpool, using
-  the Ada 2012 subpool allocator syntax.
+  otherwise the Allocate generics would not allow this. In Ada 2012, and
+  later, one can not only allocate objects of limited types to the default
+  subpool, but one also allocate objects of limited types to any subpool,
+  using the Ada 2012 subpool allocator syntax.
 
 4.0 BUILD INSTRUCTIONS 
 ======================
@@ -246,9 +247,9 @@ There are 4 Storage Pool packages to choose from in Deepend.
    -----------------------------------------------------------------
 
 - For GNAT Pro, GNAT GPL or GNAT AUX, load the appropriate .gpr file 
-  from either the 95, 2005, or 2012 sub-folder into the GPS ide, and build
-  the executable from within the ide, or alternatively use gnatmake to 
-  perform the equivalent actions described in the .gpr file.
+  from either the 95, 2005, 2012, or 2022 sub-folder into the GPS ide,
+  and build the executable from within the ide, or alternatively use
+  gnatmake to perform the equivalent actions described in the .gpr file.
   You can also execute the master build for all projects by entering
   the following command from the command line from the root folder.
  
@@ -278,9 +279,9 @@ a later version of GCC on the Raspberry PI, such as FSF GCC 5.2.0, would
 correct these issues.
 
 Deepend is intended to be portable to any platform that supports 
-Ada95, Ada 2005 or Ada 2012 compilation, and in theory, any Ada95, 
-Ada 2005,  or Ada 2012 compiler should be able to compile the code 
-since there are no dependencies on vendor specific run-time libraries.
+Ada95, Ada 2005, Ada 2012, or Ada 2022 compilation, and in theory, any
+Ada95, Ada 2005, Ada 2012, or Ada 2022 compiler should be able to compile
+the code since there are no dependencies on vendor specific run-time libraries.
 
 It should also be possible to compile Deepend for any target
 system, since Deepend does not rely on any OS-specific support.
@@ -294,8 +295,9 @@ or objects of types inherited from types defined in Ada.Finalization)
 to a subpool and then Deallocate the subpool associated with those
 objects rather than wait for the pool finalization to occur. 
 
-For the Ada 2012 version of the packages, it is only erroneous to
-allocate task objects, or objects that contain tasks to a subpool.
+For the Ada 2012, and Ada 2022 version of the packages, it is only
+erroneous to allocate task objects, or objects that contain tasks to a
+subpool.
 Objects of unconstrained types, protected types, and controlled types
 may be allocated to a subpool, and will be properly deallocated if
 the containing subpool is deallocated.
@@ -322,10 +324,12 @@ pool. See RM (13.11.3).
 ====================
 
 A simple test executable test_dynamic_pools executable exercises the 
-pool. There are Ada 95, Ada 2005, and Ada 2012 versions of this test driver.
+pool. There are Ada 95, Ada 2005, Ada 2012, and Ada 2022 versions of
+this test driver.
 
 In addition, there are binary_trees test executables with two different
-implementations of a benchmark test, for Ada 95,  Ada 2005 and Ada 2012.
+implementations of a benchmark test, for Ada 95, Ada 2005, Ada 2012, 
+and Ada 2022.
     - the implementations (bounded and unbounded) under the folder;
           nosubpools
       performs all allocations using the new operator and relies on
@@ -335,9 +339,9 @@ implementations of a benchmark test, for Ada 95,  Ada 2005 and Ada 2012.
       benchmark in Ada 95, Ada 2005 and Ada 2012 
     - the implementations (bounded and unbounded) under the folder;
            subpools
-	   performs all allocations using the Ada 2012 subpool allocator syntax,
-       or Deepend's Allocate generic for Ada 2005, rather than using
-       the traditional "new" operator with Ada 83 syntax.
+      performs all allocations using the Ada 2012 subpool allocator syntax,
+      or Deepend's Allocate generic for Ada 2005, rather than using
+      the traditional "new" operator with Ada 83 syntax.
 
 8.0 WHY DEEPEND?
 ================

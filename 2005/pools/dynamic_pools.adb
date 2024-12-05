@@ -85,9 +85,9 @@ package body Dynamic_Pools is
       procedure Delete (Subpool : Dynamic_Subpool_Access) is
          Position : Subpool_Vector.Cursor := Subpools.Find (Subpool);
       begin
-         pragma Warnings (Off, "*Position*modified*but*never referenced*");
+         pragma Warnings (Off, "*Position*modified*but*n* referenced*");
          Subpools.Delete (Position);
-         pragma Warnings (On, "*Position*modified*but*never referenced*");
+         pragma Warnings (On, "*Position*modified*but*n* referenced*");
       end Delete;
 
       --------------------------------------------------------------

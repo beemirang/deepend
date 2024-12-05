@@ -9,7 +9,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 with System.Storage_Elements; use System;
 with Ada.Finalization;
 
-procedure Test_Dynamic_Pools_Ada2012
+procedure Test_Dynamic_Pools_Ada2022
 is
 
    Pool : Dynamic_Pools.Dynamic_Pool;
@@ -375,4 +375,4 @@ begin
    Put_Line ("Successful Completion");
    New_Line;
 
-end Test_Dynamic_Pools_Ada2012;
+end Test_Dynamic_Pools_Ada2022;

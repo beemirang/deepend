@@ -2,7 +2,7 @@
 --
 --              Deepend - Dynamic Pools for Ada 2005 and Ada 2012
 --
---                   B A S I C   D Y N A M I C   P O O L S
+--           B A S I C   B O U N D E D   D Y N A M I C   P O O L S
 --
 --                                B o d y
 --
@@ -29,9 +29,7 @@
 
 with Ada.Unchecked_Deallocation;
 
-package body Basic_Dynamic_Pools is
-
-   procedure Free_Storage_Element (Position : Storage_Vector.Cursor);
+package body Basic_Bounded_Dynamic_Pools is
 
    procedure Free_Storage_Array is new Ada.Unchecked_Deallocation
      (Object => System.Storage_Elements.Storage_Array,
@@ -47,34 +45,30 @@ package body Basic_Dynamic_Pools is
       Alignment : Storage_Elements.Storage_Count)
    is
       pragma Unreferenced (Alignment);
-      use type Storage_Elements.Storage_Count;
-      use type Ada.Containers.Count_Type;
    begin
 
-      pragma Assert (Is_Owner (Pool, Current_Task));
+      if Pool.Heap_Allocated then
 
-      --  If there's not enough space in the current hunk of memory
-      if Size_In_Storage_Elements > Pool.Active'Length - Pool.Next_Allocation
-      then
-
-         Pool.Used_List.Append (New_Item => Pool.Active);
-
-         if Pool.Free_List.Length > 0 and then
-           Pool.Free_List.First_Element'Length >= Size_In_Storage_Elements
+         if Size_In_Storage_Elements >
+           Pool.Active_Access'Length - Pool.Next_Allocation
          then
-            Pool.Active := Pool.Free_List.First_Element;
-            Pool.Free_List.Delete_First;
-         else
-            Pool.Active := new System.Storage_Elements.Storage_Array
-              (1 .. Storage_Elements.Storage_Count'Max
-                 (Size_In_Storage_Elements, Pool.Block_Size));
+
+            raise Storage_Error;
          end if;
 
-         Pool.Next_Allocation := Pool.Active'First;
+         Storage_Address := Pool.Active_Access (Pool.Next_Allocation)'Address;
 
+      else
+         if Size_In_Storage_Elements >
+           Pool.Active'Length - Pool.Next_Allocation
+         then
+
+            raise Storage_Error;
+         end if;
+
+         Storage_Address := Pool.Active (Pool.Next_Allocation)'Address;
       end if;
 
-      Storage_Address := Pool.Active (Pool.Next_Allocation)'Address;
       Pool.Next_Allocation := Pool.Next_Allocation + Size_In_Storage_Elements;
 
    end Allocate;
@@ -84,26 +78,21 @@ package body Basic_Dynamic_Pools is
    overriding
    procedure Finalize   (Pool : in out Basic_Dynamic_Pool) is
    begin
-      Pool.Used_List.Iterate (Process => Free_Storage_Element'Access);
-      Pool.Free_List.Iterate (Process => Free_Storage_Element'Access);
-      Free_Storage_Array (Pool.Active);
+      if Pool.Heap_Allocated then
+         Free_Storage_Array (Pool.Active_Access);
+      end if;
    end Finalize;
-
-   --------------------------------------------------------------
-
-   procedure Free_Storage_Element (Position : Storage_Vector.Cursor) is
-       Storage : Storage_Array_Access := Storage_Vector.Element (Position);
-   begin
-      Free_Storage_Array (Storage);
-   end Free_Storage_Element;
 
    --------------------------------------------------------------
 
    overriding
    procedure Initialize (Pool : in out Basic_Dynamic_Pool) is
    begin
-      Pool.Active := new System.Storage_Elements.Storage_Array
-        (1 .. Pool.Block_Size);
+      if Pool.Heap_Allocated then
+         Pool.Active_Access := new System.Storage_Elements.Storage_Array
+           (1 .. Pool.Size);
+      end if;
+
       Pool.Next_Allocation := 1;
       Pool.Owner := Ada.Task_Identification.Current_Task;
    end Initialize;
@@ -123,12 +112,7 @@ package body Basic_Dynamic_Pools is
      (Pool : in out Basic_Dynamic_Pool;
       T : Task_Id := Current_Task) is
    begin
-      pragma Assert
-        ((Is_Owner (Pool, Null_Task_Id) and then T = Current_Task)
-         or else (Is_Owner (Pool) and then T = Null_Task_Id));
-
       Pool.Owner := T;
-
    end Set_Owner;
 
    --------------------------------------------------------------
@@ -136,52 +120,18 @@ package body Basic_Dynamic_Pools is
    overriding
    function Storage_Size
      (Pool : Basic_Dynamic_Pool)
-      return Storage_Elements.Storage_Count
-   is
-      procedure Add_Storage_Count (Position : Storage_Vector.Cursor);
-
-      Result : Storage_Elements.Storage_Count := 0;
-
-      procedure Add_Storage_Count (Position : Storage_Vector.Cursor)
-      is
-         use type Storage_Elements.Storage_Offset;
-      begin
-         Result := Result + Storage_Vector.Element (Position)'Length;
-      end Add_Storage_Count;
-
-      use type Storage_Elements.Storage_Count;
+      return Storage_Elements.Storage_Count is
    begin
-      Pool.Used_List.Iterate
-        (Process => Add_Storage_Count'Access);
-      Pool.Free_List.Iterate
-        (Process => Add_Storage_Count'Access);
-
-      return Result + Pool.Active'Length;
+      return Pool.Size;
    end Storage_Size;
 
    --------------------------------------------------------------
 
    function Storage_Used
      (Pool : Basic_Dynamic_Pool)
-      return Storage_Elements.Storage_Count
-   is
-      procedure Add_Storage_Count (Position : Storage_Vector.Cursor);
-
-      Result : Storage_Elements.Storage_Count := 0;
-
-      procedure Add_Storage_Count (Position : Storage_Vector.Cursor)
-      is
-         use type Storage_Elements.Storage_Offset;
-      begin
-         Result := Result + Storage_Vector.Element (Position)'Length;
-      end Add_Storage_Count;
-
-      use type Storage_Elements.Storage_Count;
+      return Storage_Elements.Storage_Count is
    begin
-      Pool.Used_List.Iterate
-        (Process => Add_Storage_Count'Access);
-
-      return Result + Pool.Next_Allocation - 1;
+      return Pool.Next_Allocation - 1;
    end Storage_Used;
 
-end Basic_Dynamic_Pools;
+end Basic_Bounded_Dynamic_Pools;

@@ -11,7 +11,7 @@ with System.Storage_Elements; use System;
 
 pragma Elaborate_All (Dynamic_Pools);
 
-package Trees_Ada2012 is
+package Trees_Ada2022 is
 
    type Tree_Node is private;
 
@@ -42,4 +42,4 @@ private
    Node_Size : constant Storage_Elements.Storage_Count :=
      Node'Max_Size_In_Storage_Elements;
 
-end Trees_Ada2012;
+end Trees_Ada2022;

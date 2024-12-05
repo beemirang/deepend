@@ -60,7 +60,7 @@ with Ada.Task_Identification; use Ada.Task_Identification;
 
 with System.Storage_Elements; use System.Storage_Elements;
 
-procedure Binary_Trees_Without_Subpools_Ada95 is
+procedure Binary_Trees_Basic_Pool_Ada95 is
 
    package Trees renames Trees_Ada95;
 
@@ -319,4 +319,4 @@ begin
       New_Line;
    end if;
 
-end Binary_Trees_Without_Subpools_Ada95;
+end Binary_Trees_Basic_Pool_Ada95;

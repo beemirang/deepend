@@ -1,8 +1,8 @@
-project Bounded_Binary_Trees_Ada2012 is
+project Binary_Trees_Ada2022 is
 
    for Object_Dir use "../obj/";
    for Exec_Dir use "../../../bin/";
-   for Main use ("binary_trees_with_bounded_subpools_ada2012.adb");
+   for Main use ("binary_trees_basic_pool_ada2022.adb");
    for Source_Dirs use ("../../pools", ".");
 
    package Builder is
@@ -11,14 +11,15 @@ project Bounded_Binary_Trees_Ada2012 is
    end Builder;
 
    package Compiler is
-      for Default_Switches ("ada") use ("-gnatf", "-gnatwc.cfjklmp.pr.rtu.w.x.i.h.l.o.s.t.u", "-gnatyaAbcefhikIlnmprStuxBO", "-gnat2012", "-gnatVn", "-g", "-O3", "-gnatn", "-funroll-loops", "-gnatp");
+      for Default_Switches ("ada") use ("-gnatf", "-gnatwc.cfjklmp.pr.rtu.w.x.h.i.l.o.s.t.u", "-gnatyaAbcefhikIlnmprStuxBO", "-gnatVn", "-gnatp", "-O3", "-gnatn", "-funroll-loops", "-g", "-gnat2022");
    end Compiler;
 
    package Linker is
    end Linker;
 
    package Binder is
+      for Default_Switches ("ada") use ("-E");
    end Binder;
 
-end Bounded_Binary_Trees_Ada2012;
+end Binary_Trees_Ada2022;
 

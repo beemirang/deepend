@@ -7,7 +7,7 @@
 --
 --  Contributed by Brad Moore
 
-package body Bounded_Trees_Ada2012 is
+package body Trees_Ada2022 is
 
    function Create
      (Subpool : Subpool_Handle;
@@ -47,4 +47,4 @@ package body Bounded_Trees_Ada2012 is
          return Item.Value + Item_Check (Item.Left) - Item_Check (Item.Right);
       end if;
    end Item_Check;
-end Bounded_Trees_Ada2012;
+end Trees_Ada2022;

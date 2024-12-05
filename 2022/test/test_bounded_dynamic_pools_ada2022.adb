@@ -4,15 +4,16 @@ pragma Restrictions
    No_Implementation_Identifiers,
    No_Implementation_Units);
 
-with Dynamic_Pools; use Dynamic_Pools;
+with Bounded_Dynamic_Pools;
 with Ada.Text_IO; use Ada.Text_IO;
 with System.Storage_Elements; use System;
 with Ada.Finalization;
 
-procedure Test_Dynamic_Pools_Ada2012
+procedure Test_Bounded_Dynamic_Pools_Ada2022
 is
 
-   Pool : Dynamic_Pools.Dynamic_Pool;
+   Pool : Bounded_Dynamic_Pools.Dynamic_Pool (Default_Subpool_Size => 1000,
+                                              Maximum_Subpools => 100);
    pragma Default_Storage_Pool (Pool);
 
    subtype Id_String is String (1 .. 10);
@@ -74,8 +75,8 @@ is
 
    function Recurse (Depth : Natural) return Node_Access
    is
-      Sub_Pool : constant Dynamic_Pools.Subpool_Handle
-        := Dynamic_Pools.Create_Subpool (Pool);
+      Sub_Pool : constant Bounded_Dynamic_Pools.Subpool_Handle
+        := Bounded_Dynamic_Pools.Create_Subpool (Pool);
 
       Node : constant Node_Access := new (Sub_Pool) Node_Type;
 
@@ -115,7 +116,7 @@ is
 
    procedure Deallocate_Default_Subpool
    is
-      Default_Subpool : Dynamic_Pools.Subpool_Handle :=
+      Default_Subpool : Bounded_Dynamic_Pools.Subpool_Handle :=
         Pool.Default_Subpool_For_Pool;
    begin
 
@@ -123,14 +124,12 @@ is
 
       pragma Warnings (Off, "*Default_Subpool*modified*but*n* referenced*");
 
-      Dynamic_Pools.Unchecked_Deallocate_Subpool (Default_Subpool);
+      Bounded_Dynamic_Pools.Unchecked_Deallocate_Subpool (Default_Subpool);
 
       pragma Warnings (On, "*Default_Subpool*modified*but*n* referenced*");
 
-      Put_Line ("Storage Used=" &
-                  Storage_Elements.Storage_Count'Image (Pool.Storage_Used) &
-                  ", Storage Size=" &
-                  Storage_Elements.Storage_Count'Image (Pool.Storage_Size));
+      Put_Line ("Bytes Stored=" &
+                Storage_Elements.Storage_Count'Image (Pool.Storage_Used));
    end Deallocate_Default_Subpool;
 
    List : Node_Access;
@@ -143,7 +142,7 @@ is
 
    use type System.Storage_Elements.Storage_Offset;
 
-begin
+begin --  Test_Bounded_Dynamic_Pools_Ada2012
 
    New_Line;
    Put_Line ("Initial Storage Used=" &
@@ -164,7 +163,7 @@ begin
         Pool.Storage_Used;
 
       Subpool_Storage_Used : constant Storage_Elements.Storage_Count :=
-        Dynamic_Pools.Storage_Used
+        Bounded_Dynamic_Pools.Storage_Used
              (Subpool => Pool.Default_Subpool_For_Pool);
    begin
 
@@ -177,7 +176,7 @@ begin
                   Storage_Elements.Storage_Count'Image (Subpool_Storage_Used) &
                   ", Storage Size=" &
           Storage_Elements.Storage_Count'Image
-          (Dynamic_Pools.Storage_Size
+          (Bounded_Dynamic_Pools.Storage_Size
              (Subpool => Pool.Default_Subpool_For_Pool)));
 
       Put_Line
@@ -186,11 +185,10 @@ begin
            (Total_Storage_Used - Subpool_Storage_Used));
    end;
 
-   pragma Warnings (Off, "*Object*assigned but never read*");
-
+   pragma Warnings (Off, "*Object*is*never read*");
    declare
-      Sub_Pool : Dynamic_Pools.Subpool_Handle
-        := Dynamic_Pools.Create_Subpool (Pool);
+      Sub_Pool : Bounded_Dynamic_Pools.Subpool_Handle
+        := Bounded_Dynamic_Pools.Create_Subpool (Pool);
 
       Object : RC_Access;
    begin
@@ -211,7 +209,9 @@ begin
       Put_Line ("Deallocating Subpool...");
 
       pragma Warnings (Off, "*Sub_Pool* modified* but* n* referenced*");
-      Dynamic_Pools.Unchecked_Deallocate_Subpool (Sub_Pool);
+
+      Bounded_Dynamic_Pools.Unchecked_Deallocate_Subpool (Sub_Pool);
+
       pragma Warnings (On, "*Sub_Pool* modified* but* n* referenced*");
 
       Put_Line ("Object Count=" & Natural'Image (Object_Count));
@@ -223,8 +223,10 @@ begin
 
       pragma Suppress (Accessibility_Check);
 
-      Sub_Pool : constant Dynamic_Pools.Scoped_Subpool
-        := Dynamic_Pools.Create_Subpool (Pool => Pool);
+      Sub_Pool : Bounded_Dynamic_Pools.Scoped_Subpool
+        := Bounded_Dynamic_Pools.Scoped_Subpools.Create_Subpool
+          (Pool => Pool,
+           Size    => 400);
 
       pragma Unsuppress (Accessibility_Check);
 
@@ -242,9 +244,16 @@ begin
       Put_Line ("Bytes Stored=" &
                   Storage_Elements.Storage_Count'Image (Pool.Storage_Used));
 
+      Put_Line ("Deallocating Subpool...");
+
+      --  Bounded_Dynamic_Pools.Unchecked_Deallocate_Subpool (Sub_Pool.Handle);
+
+      Put_Line ("Object Count=" & Natural'Image (Object_Count));
+      Put_Line ("Bytes Stored=" &
+                  Storage_Elements.Storage_Count'Image (Pool.Storage_Used));
    end;
 
-   pragma Warnings (On, "*Object*assigned but never read*");
+   pragma Warnings (On, "*Object*is*never read*");
 
    Put_Line ("After Finalization, Object Count=" &
                Natural'Image (Object_Count));
@@ -254,9 +263,11 @@ begin
    begin
 
       declare
-         Sub_Pool : Dynamic_Pools.Subpool_Handle
-           := Dynamic_Pools.Create_Subpool (Pool);
+         Sub_Pool : Bounded_Dynamic_Pools.Subpool_Handle
+           := Bounded_Dynamic_Pools.Create_Subpool (Pool);
       begin
+
+         Put_Line ("Allocating objects to a new subpool");
 
          for I in 1 .. 10 loop
             declare
@@ -273,17 +284,19 @@ begin
          Put_Line ("Deallocating Subpool...");
 
          pragma Warnings (Off, "*Sub_Pool* modified*but*n* referenced*");
-         Dynamic_Pools.Unchecked_Deallocate_Subpool (Sub_Pool);
+         Bounded_Dynamic_Pools.Unchecked_Deallocate_Subpool (Sub_Pool);
          pragma Warnings (On, "*Sub_Pool* modified*but*n* referenced*");
       end;
 
       declare
          pragma Suppress (Accessibility_Check);
 
-         Sub_Pool : constant Dynamic_Pools.Scoped_Subpool
-           := Dynamic_Pools.Create_Subpool (Pool);
+         Sub_Pool : Bounded_Dynamic_Pools.Scoped_Subpool
+           := Bounded_Dynamic_Pools.Scoped_Subpools.Create_Subpool
+             (Pool, 1000);
 
          pragma Unsuppress (Accessibility_Check);
+
       begin
 
          Put_Line ("Allocating objects to a new scoped subpool");
@@ -312,13 +325,13 @@ begin
 
    Deallocate_Default_Subpool;
 
-   --  Reinstate a default subpool
+   --  Reinstate another default subpool
    Pool.Create_Default_Subpool;
 
    Put_Line
      ("Bytes Stored in Default Subpool=" &
         Storage_Elements.Storage_Count'Image
-        (Dynamic_Pools.Storage_Used
+        (Bounded_Dynamic_Pools.Storage_Used
            (Subpool => Pool.Default_Subpool_For_Pool)));
 
    pragma Warnings (Off, "*Object*is assigned but never read*");
@@ -339,7 +352,7 @@ begin
       Put_Line
         ("Bytes Stored in Default Subpool=" &
            Storage_Elements.Storage_Count'Image
-           (Dynamic_Pools.Storage_Used
+           (Bounded_Dynamic_Pools.Storage_Used
               (Subpool => Pool.Default_Subpool_For_Pool)));
    end;
    pragma Warnings (On, "*Object*is assigned but never read*");
@@ -348,12 +361,13 @@ begin
 
    Deallocate_Default_Subpool;
 
-   --  Reinstate a default subpool
+   --  Reinstate another default subpool
    Pool.Create_Default_Subpool;
+
    Put_Line
      ("Bytes Stored in Default Subpool=" &
         Storage_Elements.Storage_Count'Image
-        (Dynamic_Pools.Storage_Used
+        (Bounded_Dynamic_Pools.Storage_Used
            (Subpool => Pool.Default_Subpool_For_Pool)));
 
    Put_Line ("At this point, the nodes and their descriptions still exist,");
@@ -374,5 +388,4 @@ begin
    New_Line;
    Put_Line ("Successful Completion");
    New_Line;
-
-end Test_Dynamic_Pools_Ada2012;
+end Test_Bounded_Dynamic_Pools_Ada2022;

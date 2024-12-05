@@ -1,6 +1,16 @@
 Deepend Version History.
 
-deepend-3.9 (Current Version)
+deepend-3.10 (Current Version)
+- Addressed errors reported by gnat2022 compiler, and addressed all warnings
+- Added an Ada2022 version of the source code, that compiles clean for Ada 2022.
+  This is in addition to the Ada95, Ada 2005, and Ada 2012 variants of the source
+  code.
+- Removed generics used to bypass subpool code to achieve faster speeds. This was
+  no longer needed. For the binary tree example, to use sub pools, it was 
+  necessary to change to the access to node type from a general access type to a
+  non-general access type. This may also have contributed to the speed up.
+
+deepend-3.9
 - Updates to support compilation with Janus Ada compiler for Ada 95
   version.
 - Eliminate all usage of 'Unchecked_Access. In most cases, replace with
@@ -68,7 +78,7 @@ deepend-3.7
   object value, prior to use. Now the allocations of these subprograms
   should work consistent with the "new" keyword allocations for
   uninitialized allocations.
-  
+
 deepend-3.6
 - Improved portability and safety by replacing usage of Ada.Unchecked_Conversion
   with System.Address_To_Access_Conversions in the Bounded_Dynamic_Pool and the

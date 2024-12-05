@@ -9,14 +9,6 @@
 
 package body Trees_Ada2012 is
 
-   package Node_Allocators is new
-     Subpool_Allocators
-       (Allocation_Type        => Node,
-        Allocation_Type_Access => Tree_Node,
-        Default_Value          => Node'(Left  => null,
-                                        Right => null,
-                                        Value => 0));
-
    function Create
      (Subpool : Subpool_Handle;
       Item : Integer;
@@ -26,23 +18,7 @@ package body Trees_Ada2012 is
         (Item : Integer;
          Depth : Integer) return Tree_Node
       is
-         function Allocate_Node return Tree_Node
-         is
-            --  A constant Boolean will conditionally compile in the selected
-            --  code
-            Use_Ada2012_Subpool_Allocator_Syntax : constant Boolean := False;
-         begin
-            pragma Warnings (Off, "*code can never be executed*");
-
-            if Use_Ada2012_Subpool_Allocator_Syntax then
-               return new (Subpool) Node;
-            else
-               return Node_Allocators.Allocate (Subpool);
-            end if;
-
-            pragma Warnings (On, "*code can never be executed*");
-
-         end Allocate_Node;
+         function Allocate_Node return Tree_Node is (new (Subpool) Node);
 
          Result : constant Tree_Node := Allocate_Node;
       begin

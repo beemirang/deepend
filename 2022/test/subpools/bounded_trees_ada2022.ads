@@ -6,12 +6,12 @@
 --    C version by Francesco Abbate
 --
 --  Contributed by Brad Moore
-with Dynamic_Pools; use Dynamic_Pools;
+with Bounded_Dynamic_Pools; use Bounded_Dynamic_Pools;
 with System.Storage_Elements; use System;
 
-pragma Elaborate_All (Dynamic_Pools);
+pragma Elaborate_All (Bounded_Dynamic_Pools);
 
-package Trees_Ada2012 is
+package Bounded_Trees_Ada2022 is
 
    type Tree_Node is private;
 
@@ -24,7 +24,9 @@ package Trees_Ada2012 is
 
    Node_Size : constant Storage_Elements.Storage_Count;
 
-   Pool : Dynamic_Pools.Dynamic_Pool (Default_Block_Size => 0);
+   Pool : Bounded_Dynamic_Pools.Dynamic_Pool
+     (Default_Subpool_Size => 0,
+      Maximum_Subpools => 100);
 
 private
 
@@ -42,4 +44,4 @@ private
    Node_Size : constant Storage_Elements.Storage_Count :=
      Node'Max_Size_In_Storage_Elements;
 
-end Trees_Ada2012;
+end Bounded_Trees_Ada2022;

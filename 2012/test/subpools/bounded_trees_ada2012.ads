@@ -31,7 +31,7 @@ package Bounded_Trees_Ada2012 is
 private
 
    type Node;
-   type Tree_Node is access all Node;
+   type Tree_Node is access Node;
    for Tree_Node'Storage_Pool use Pool;
    pragma No_Strict_Aliasing (Tree_Node);
 

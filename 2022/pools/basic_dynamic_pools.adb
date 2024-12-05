@@ -34,7 +34,7 @@ package body Basic_Dynamic_Pools is
    procedure Free_Storage_Element (Position : Storage_Vector.Cursor);
 
    procedure Free_Storage_Array is new Ada.Unchecked_Deallocation
-     (Object => System.Storage_Elements.Storage_Array,
+     (Object => Storage_Array,
       Name => Storage_Array_Access);
 
    --------------------------------------------------------------
@@ -47,11 +47,8 @@ package body Basic_Dynamic_Pools is
       Alignment : Storage_Elements.Storage_Count)
    is
       pragma Unreferenced (Alignment);
-      use type Storage_Elements.Storage_Count;
       use type Ada.Containers.Count_Type;
    begin
-
-      pragma Assert (Is_Owner (Pool, Current_Task));
 
       --  If there's not enough space in the current hunk of memory
       if Size_In_Storage_Elements > Pool.Active'Length - Pool.Next_Allocation
@@ -76,7 +73,6 @@ package body Basic_Dynamic_Pools is
 
       Storage_Address := Pool.Active (Pool.Next_Allocation)'Address;
       Pool.Next_Allocation := Pool.Next_Allocation + Size_In_Storage_Elements;
-
    end Allocate;
 
    --------------------------------------------------------------
@@ -123,12 +119,7 @@ package body Basic_Dynamic_Pools is
      (Pool : in out Basic_Dynamic_Pool;
       T : Task_Id := Current_Task) is
    begin
-      pragma Assert
-        ((Is_Owner (Pool, Null_Task_Id) and then T = Current_Task)
-         or else (Is_Owner (Pool) and then T = Null_Task_Id));
-
       Pool.Owner := T;
-
    end Set_Owner;
 
    --------------------------------------------------------------
@@ -138,23 +129,16 @@ package body Basic_Dynamic_Pools is
      (Pool : Basic_Dynamic_Pool)
       return Storage_Elements.Storage_Count
    is
-      procedure Add_Storage_Count (Position : Storage_Vector.Cursor);
-
       Result : Storage_Elements.Storage_Count := 0;
-
-      procedure Add_Storage_Count (Position : Storage_Vector.Cursor)
-      is
-         use type Storage_Elements.Storage_Offset;
-      begin
-         Result := Result + Storage_Vector.Element (Position)'Length;
-      end Add_Storage_Count;
-
-      use type Storage_Elements.Storage_Count;
    begin
-      Pool.Used_List.Iterate
-        (Process => Add_Storage_Count'Access);
-      Pool.Free_List.Iterate
-        (Process => Add_Storage_Count'Access);
+
+      for E in Pool.Used_List.Iterate loop
+         Result := Result + Pool.Used_List (E).all'Length;
+      end loop;
+
+      for E in Pool.Free_List.Iterate loop
+         Result := Result + Pool.Free_List (E).all'Length;
+      end loop;
 
       return Result + Pool.Active'Length;
    end Storage_Size;
@@ -165,21 +149,12 @@ package body Basic_Dynamic_Pools is
      (Pool : Basic_Dynamic_Pool)
       return Storage_Elements.Storage_Count
    is
-      procedure Add_Storage_Count (Position : Storage_Vector.Cursor);
-
       Result : Storage_Elements.Storage_Count := 0;
-
-      procedure Add_Storage_Count (Position : Storage_Vector.Cursor)
-      is
-         use type Storage_Elements.Storage_Offset;
-      begin
-         Result := Result + Storage_Vector.Element (Position)'Length;
-      end Add_Storage_Count;
-
-      use type Storage_Elements.Storage_Count;
    begin
-      Pool.Used_List.Iterate
-        (Process => Add_Storage_Count'Access);
+
+      for E in Pool.Used_List.Iterate loop
+         Result := Result + Pool.Used_List (E).all'Length;
+      end loop;
 
       return Result + Pool.Next_Allocation - 1;
    end Storage_Used;

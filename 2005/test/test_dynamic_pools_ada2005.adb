@@ -101,11 +101,11 @@ is
 
       Put_Line ("Deallocating Default Subpool");
 
-      pragma Warnings (Off, "*Default_Subpool*modified*but*never referenced*");
+      pragma Warnings (Off, "*Default_Subpool*modified*but*n* referenced*");
 
       Dynamic_Pools.Unchecked_Deallocate_Subpool (Default_Subpool);
 
-      pragma Warnings (On, "*Default_Subpool*modified*but*never referenced*");
+      pragma Warnings (On, "*Default_Subpool*modified*but*n* referenced*");
 
       Put_Line ("Storage Used=" &
                   Storage_Elements.Storage_Count'Image (Pool.Storage_Used) &
@@ -178,13 +178,13 @@ begin
 
          Put_Line ("Deallocating Subpool...");
 
-         pragma Warnings (Off, "*Sub_Pool* modified*but*never referenced*");
+         pragma Warnings (Off, "*Sub_Pool* modified*but*n* referenced*");
          Dynamic_Pools.Unchecked_Deallocate_Subpool (Sub_Pool);
-         pragma Warnings (On, "*Sub_Pool* modified*but*never referenced*");
+         pragma Warnings (On, "*Sub_Pool* modified*but*n* referenced*");
       end;
 
       declare
-         Sub_Pool : Dynamic_Pools.Scoped_Subpool
+         Sub_Pool : constant Dynamic_Pools.Scoped_Subpool
            := Dynamic_Pools.Create_Subpool (Pool'Access);
       begin
 
