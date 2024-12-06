@@ -13,7 +13,7 @@
 -- Software  Foundation;  either version 3,  or (at your option) any later  --
 -- version.  Deepend is distributed in the hope that it will be useful, but --
 -- WITHOUT ANY WARRANTY;  without even the  implied warranty of             --
--- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                     --                                     --
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                     --
 --                                                                          --
 -- As a special exception under Section 7 of GPL version 3, you are granted --
 -- additional permissions described in the GCC Runtime Library Exception,   --
