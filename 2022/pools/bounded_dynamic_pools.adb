@@ -28,7 +28,6 @@
 ------------------------------------------------------------------------------
 
 with Ada.Unchecked_Deallocation;
-with System.Address_To_Access_Conversions;
 
 package body Bounded_Dynamic_Pools is
    procedure Free_Subpool is new Ada.Unchecked_Deallocation

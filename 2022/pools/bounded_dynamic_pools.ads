@@ -359,35 +359,6 @@ package Bounded_Dynamic_Pools is
    --  been deallocatd.
    --  The task calling Create_Default_Subpool initially "owns" the subpool.
 
-   pragma Compile_Time_Warning
-     (Ada2012_Warnings,
-     "The following generics currently have an edge in performance over " &
-     "the new Ada 2012 allocator syntax, otherwise they shouldn't be needed");
-
-   generic
-      type Allocation_Type (<>) is private;
-      type Allocation_Type_Access is access all Allocation_Type;
-      Default_Value : Allocation_Type;
-   package Subpool_Allocators is
-
-      function Allocate
-        (Subpool : Subpool_Handle;
-         Value   : Allocation_Type := Default_Value)
-         return Allocation_Type_Access;
-      --  This generic routine provides a mechanism to allocate an object of
-      --  a definite subtype from a specific subpool, and initializing the
-      --  new object with a specific value.
-
-      function Allocate
-        (Subpool : Scoped_Subpool;
-         Value   : Allocation_Type := Default_Value)
-         return Allocation_Type_Access;
-      --  This generic routine provides a mechanism to allocate an object of
-      --  a definite subtype from a specific scoped subpool, and initializing
-      --  the new object with a specific value.
-
-   end Subpool_Allocators;
-
 private
 
    subtype Storage_Array is System.Storage_Elements.Storage_Array;
