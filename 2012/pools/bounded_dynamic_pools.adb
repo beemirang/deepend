@@ -28,7 +28,6 @@
 ------------------------------------------------------------------------------
 
 with Ada.Unchecked_Deallocation;
-with System.Address_To_Access_Conversions;
 
 package body Bounded_Dynamic_Pools is
    procedure Free_Subpool is new Ada.Unchecked_Deallocation
@@ -327,69 +326,5 @@ package body Bounded_Dynamic_Pools is
    begin
       Dynamic_Subpool (Subpool.all).Owner := T;
    end Set_Owner;
-
-   --------------------------------------------------------------
-
-   package body Subpool_Allocators is
-
-      package Subpool_Handle_Conversions is new
-        Address_To_Access_Conversions (Object => Allocation_Type);
-
-      function Allocate
-        (Subpool : Subpool_Handle;
-         Value : Allocation_Type := Default_Value)
-      return Allocation_Type_Access
-      is
-         Location : System.Address;
-      begin
-
-         Storage_Pools.Subpools.Pool_Of_Subpool (Subpool).Allocate_From_Subpool
-           (Storage_Address => Location,
-            Size_In_Storage_Elements =>
-              Value'Size / System.Storage_Elements.Storage_Element'Size,
-            Alignment => Allocation_Type'Alignment,
-            Subpool => Subpool);
-
-         declare
-            Result : constant Allocation_Type_Access :=
-              Allocation_Type_Access
-                (Subpool_Handle_Conversions.To_Pointer (Location));
-         begin
-            Result.all := Value;
-            return Result;
-         end;
-
-      end Allocate;
-
-      --------------------------------------------------------------
-
-      function Allocate
-        (Subpool : Scoped_Subpool;
-         Value   : Allocation_Type := Default_Value)
-      return Allocation_Type_Access
-      is
-         Location : System.Address;
-      begin
-
-         Storage_Pools.
-           Subpools.Pool_Of_Subpool (Subpool.Handle).Allocate_From_Subpool
-           (Storage_Address => Location,
-            Size_In_Storage_Elements =>
-              Value'Size / System.Storage_Elements.Storage_Element'Size,
-            Alignment => Allocation_Type'Alignment,
-            Subpool => Subpool.Handle);
-
-         declare
-            Result : constant Allocation_Type_Access :=
-              Allocation_Type_Access
-                (Subpool_Handle_Conversions.To_Pointer (Location));
-         begin
-            Result.all := Value;
-            return Result;
-         end;
-
-      end Allocate;
-
-   end Subpool_Allocators;
 
 end Bounded_Dynamic_Pools;
