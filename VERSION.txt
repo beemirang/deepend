@@ -1,6 +1,9 @@
 Deepend Version History.
 
-deepend-3.11 (Current Version)
+deepend-3.12 (Current Version)
+- Updated copyright headers
+
+deepend-3.11
 - Removed generic packages for the Ada 2012 and Ada 2022 Bounded Pools
   packages, as was already done for the unbounded Dynamic Pools packages.
   These generics are no longer useful, because Ada 2012 doesn't allow
