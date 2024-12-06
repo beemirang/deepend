@@ -1,12 +1,22 @@
 Deepend Version History.
 
-deepend-3.10 (Current Version)
+deepend-3.11 (Current Version)
+- Removed generic packages for the Ada 2012 and Ada 2022 Bounded Pools
+  packages, as was already done for the unbounded Dynamic Pools packages.
+  These generics are no longer useful, because Ada 2012 doesn't allow
+  general access types to be used with subpools, yet these generics
+  required general access types. Also, changing the client usage to be
+  non-general access types, seemed to improve performance to be more
+  similar to what the generics provided, which was the reason these
+  generics existed in the first place.
+
+deepend-3.10
 - Addressed errors reported by gnat2022 compiler, and addressed all warnings
 - Added an Ada2022 version of the source code, that compiles clean for Ada 2022.
   This is in addition to the Ada95, Ada 2005, and Ada 2012 variants of the source
   code.
 - Removed generics used to bypass subpool code to achieve faster speeds. This was
-  no longer needed. For the binary tree example, to use sub pools, it was 
+  no longer needed. For the binary tree example, to use sub pools, it was
   necessary to change to the access to node type from a general access type to a
   non-general access type. This may also have contributed to the speed up.
 
@@ -47,7 +57,7 @@ deepend-3.8
   formal object, rather than as a function of the package. In addition,
   the allocation_type can now be an unconstrained type, so it is
   possible to allocate objects such as variable length Strings or
-  objects with immutable discriminants to a specific subpool. 
+  objects with immutable discriminants to a specific subpool.
   It is still not possible to allocate objects of a limited type using
   this approach, but for that, one can always use the Ada "new" keyword
   syntax to allocate objects of limited types to the pool, but these
@@ -62,19 +72,19 @@ deepend-3.7.1
 
 deepend-3.7
 - An issue was reported that allocations using the generic allocators,
-  (Allocation and Scoped_Allocation) do not initialize memory, which is 
+  (Allocation and Scoped_Allocation) do not initialize memory, which is
   not consistent with how Ada allocators work. In particular, allocating
   an object of a type should have its discriminants set to the value of
   the designated subtype, and any default initializers should have been
-  applied. To remedy this, these calls were removed, and instead, the 
+  applied. To remedy this, these calls were removed, and instead, the
   two other generic calls, Initialized_Allocation, and
-  Scoped_Initialized_Allocation were moved to a nested package and 
+  Scoped_Initialized_Allocation were moved to a nested package and
   both renamed to Allocate, and the Value parameter (previously called the
   Qualified_Expression parameter) is now supplied with a default that is
   a value of the generic formal type that is default initialized.
   These changes were applied to the Ada 95, Ada 2005, and Ada 2012 versions
   of the libraries. Prior to this release, the calls worked as expected
-  so long as the users code initialized the allocations to a valid 
+  so long as the users code initialized the allocations to a valid
   object value, prior to use. Now the allocations of these subprograms
   should work consistent with the "new" keyword allocations for
   uninitialized allocations.
@@ -89,7 +99,7 @@ deepend-3.6
   do with using access types when general access types should have been used
   instead. These changes were made to the Bounded_Dynamic_Pools library and the
   Dynamic_Pools library, which in turn required changes to the client code to
-  use general access types. (i.e. access types with the "all" keyword as in; 
+  use general access types. (i.e. access types with the "all" keyword as in;
   type xxx is access all type).
 - The Janus Ada compiler also pointed out an issue in the Ada 95 test code
   where a generic access type could not be automatically converted to a
@@ -98,7 +108,7 @@ deepend-3.6
 - Removed Restriction No_Local_Protected_Object which is valid, and somehow
   became detectable once Unchecked_Conversion usage was removed.
 - Shortened horrendously long folder names under the test folder
-  
+
 deepend-3.5.1
 - Support for ObjectAda64 (9.2) for both Ada 2005 and Ada 95
 - Added ObjectAda .PRJ files to build all the test executables associated with
@@ -107,7 +117,7 @@ deepend-3.5.1
   where an overriding subprogram was not fully conformant to the parameter
   profile of the subprogram it was overriding. Specifically, the derived
   subprogram added a null exclusion ("non null) to an access parameter, whereas
-  the parent subprogram did not have the null exclusion for that parameter." 
+  the parent subprogram did not have the null exclusion for that parameter."
 
 deepend-3.5
 - The Ada 2012 dynamic pool and bounded dynamic pool libraries were broken
@@ -123,7 +133,7 @@ deepend-3.5
   default storage pool.
 - Some of the make files were failing also, due to containing a build option
   that either is no longer supported, or requires special configuration.
-  This callgraph compile option was removed, allowing the make to build 
+  This callgraph compile option was removed, allowing the make to build
   successfully.
 - Removed temporary hack code relating to the default subpool, due to bugs
   in GNAT which were not recognizing allocations to the default subpool.
@@ -132,9 +142,9 @@ deepend-3.5
 - Improved documentation comments in package specifications
 
 deepend-3.4
-- Fixed issues preventing compilation of Ada 2012 version for 
+- Fixed issues preventing compilation of Ada 2012 version for
   GNAT GPL 2014
-- The Pool parameter of the 
+- The Pool parameter of the
   System.Storage_Pools.Subpools.Default_Subpool_For_Pool function was
   finalized to be an in out parameter for the Ada 2012 standard.
   This requires changes to the Deepend pools, since they override this
@@ -149,12 +159,12 @@ deepend-3.4
   since they weren't very useful since they were private declarations,
   and the need for dynamic checks for this was deemed as worthwhile.
 - Removed workarounds for GNAT compiler bugs that were fixed in the
-  GNAT GPL 2014 version of the compiler. In particular, the storage 
+  GNAT GPL 2014 version of the compiler. In particular, the storage
   pools have default discriminants which now can be left unspecified
   to use the defaults.
 
 deepend-3.3
-- Fixed issues preventing compilation of Ada 2012 version for 
+- Fixed issues preventing compilation of Ada 2012 version for
   GNAT GPL 2013
 - Removed workarounds for GNAT compiler bugs for the Ada 2012
   version that were fixed in the GNAT GPL 2013 version of the compiler.
@@ -166,7 +176,7 @@ deepend-3.2
   allocated from the heap.
 - Storage_Size call fixed to match description in the Standard. It is
   supposed to return the size of all storage allocated, including free
-  storage and used storage. Previously, Deepend was reporting the 
+  storage and used storage. Previously, Deepend was reporting the
   amount of used storage. Instead, a new call, Storage_Used exists,
   which now reports the amount of used storage.
 - Scoped subpools are no longer created by the Create_Subpool call.
@@ -184,7 +194,7 @@ deepend-3.2
 - Removed non-portable use of System.Task_Info package
 - Moved pragma Precondition and Postcondition for Ada 2005 version to
   body as portable assertions.
-- Removed compile time warnings that were incorrect or no longer needed. 
+- Removed compile time warnings that were incorrect or no longer needed.
 - Updated ICC compiler build instructions
 
 deepend-3.1
@@ -205,7 +215,7 @@ deepend-3.1
   from the specified subpool.
 - Restructured compiler output folders
 
-deepend-3.0 
+deepend-3.0
 - Major revision now supports both Ada 2012 and Ada 2005
 - Storage_Size is now implemented.
 
@@ -223,36 +233,36 @@ deepend-2.5
 - Added Basic_Dynamic_Pools package, which is a subset of the functionality
   of Dynamic_Pools, with a simpler interface. It does not provide subpools,
   but still can be reclaimed all at once, similar to Dynamic_Pools.
-  The idea is that these pools are declared at nested scopes, and 
+  The idea is that these pools are declared at nested scopes, and
   access types are defined with Storage_Pool attribute set to the pool object.
   Basic_Dynamic_Pools should be forward compatible to Ada 2012, unlike
   Dynamic_Pools which will need modifications to the interface.
-  
+
 deepend-2.4
-- Major update to comments in the code. 
-- Improvement to performance for call Default_Subpool_Of_Pool, avoids 
-  accessing protected object 
-- A Default_Block_Size of 0 on the pool object discriminant causes the 
-  default subpool to not be created 
-- Attempting to allocate from the default storage pool if the pool's 
+- Major update to comments in the code.
+- Improvement to performance for call Default_Subpool_Of_Pool, avoids
+  accessing protected object
+- A Default_Block_Size of 0 on the pool object discriminant causes the
+  default subpool to not be created
+- Attempting to allocate from the default storage pool if the pool's
   Default_Block_Size is 0 raises Storage_Error
 
 deepend-2.3
 - Since removing the bindings to the Apache Run Time pool library in
   the earlier deepend-1.1 version, deepend has been running much more
   slowly than the Apache Binding version, due to a logic error.
-  Now the binary tree tests outperform the Apache runtime binding version. 
+  Now the binary tree tests outperform the Apache runtime binding version.
   e.g. For depth 20, the Apache version takes about 4.6 seconds to run.
-  This new deepend version takes about 3.8 seconds to run. 
+  This new deepend version takes about 3.8 seconds to run.
 
 deepend-2.2
-- Since Ada.Unchecked_Deallocate_Subpool doesn't exist, 
-  Unchecked_Deallocate_Subpool and Unchecked_Deallocate_Objects need to 
-  get same effect, by dispatching to Deallocate_Subpool. 
-  Otherwise, these routine aren't doing anything. Once that is done, it 
-  exposed a bug. The finalization of the pool cannot call 
-  Unchecked_Deallocate_Subpool, because that leaves the protected object, 
-  then tries to regain access to the protected object on the dispatching, 
+- Since Ada.Unchecked_Deallocate_Subpool doesn't exist,
+  Unchecked_Deallocate_Subpool and Unchecked_Deallocate_Objects need to
+  get same effect, by dispatching to Deallocate_Subpool.
+  Otherwise, these routine aren't doing anything. Once that is done, it
+  exposed a bug. The finalization of the pool cannot call
+  Unchecked_Deallocate_Subpool, because that leaves the protected object,
+  then tries to regain access to the protected object on the dispatching,
   which leads to a deadlock. This bug was fixed, by simply calling code that
   frees the subpool objects.
 
@@ -266,7 +276,7 @@ deepend-2.0
 - Subpools can no longer have subpools. This did not seem to be necessary
   and added runtime complexity. Instead, the root pool can have any number
   of subpools concurrently.
-- Synchronization added to pools subpool list, to allow tasks to create 
+- Synchronization added to pools subpool list, to allow tasks to create
   subpools
 
 deepend-1.3
@@ -276,10 +286,10 @@ deepend-1.3
   since it avoids dangling reference possibilities for subpool handles.
 
 deepend-1.2
-- Removed binding to Apache Runtime Pools library. Deepend is now pure Ada 
+- Removed binding to Apache Runtime Pools library. Deepend is now pure Ada
   source.
 
 deepend-1.1
--  Addressed comments from initial code review. 
+-  Addressed comments from initial code review.
 
 deepend-1.0	- Initial Version
