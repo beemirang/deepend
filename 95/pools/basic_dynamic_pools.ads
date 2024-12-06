@@ -1,6 +1,6 @@
 ------------------------------------------------------------------------------
 --
---     Deepend - Dynamic Storage Pools for Ada 95, Ada 2005 and Ada 2012
+--     Deepend - Dynamic Storage Pools for Ada 95, 2005, 2012, and 2022
 --
 --                   B A S I C   D Y N A M I C   P O O L S
 --
@@ -11,7 +11,7 @@
 --  Deepend is free software;  you can  redistribute it  and/or modify it
 --  under  terms of the  GNU General Public License  as  published  by the
 --  Free Software  Foundation;  either version 2,  or (at your option) any
---  later  version.  Paraffin is  distributed in the hope that it  will be
+--  later  version.  Deepend is  distributed in the hope that it  will be
 --  useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 --  MERCHANTABILITY  or  FITNESS  FOR  A  PARTICULAR PURPOSE.  See the GNU
 --  General Public License for  more details.  You should have  received a

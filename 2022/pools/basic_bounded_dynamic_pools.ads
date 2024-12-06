@@ -1,6 +1,6 @@
 ------------------------------------------------------------------------------
 --
---     Deepend - Dynamic Storage Pools for Ada 95, Ada 2005 and Ada 2012
+--     Deepend - Dynamic Storage Pools for Ada 95, 2005, 2012, and 2022
 --
 --            B A S I C   B O U N D E D   D Y N A M I C   P O O L S
 --
