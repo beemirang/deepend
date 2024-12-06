@@ -1,0 +1,36 @@
+name = "deepend"
+description = "Bounded & Unbounded memory storage pools with subpool capabilities"
+version = "0.1.0-dev"
+
+authors = ["Brad Moore"]
+maintainers = ["Brad Moore <bmoore.ada@gmail.com>"]
+maintainers-logins = ["billymeister"]
+licenses = "GPL-3.0-or-later WITH GCC-exception-3.1"
+website = "https://sourceforge.net/projects/deepend/"
+tags = ["ada", "memory", "storage-pools", "subpools"]
+project-files = ["make_all.gpr"]
+
+executables = ["test_dynamic_pools_ada95",
+               "test_dynamic_pools_ada2005",
+               "test_dynamic_pools_ada2012",
+               "test_dynamic_pools_ada2022",
+               "test_bounded_dynamic_pools_ada95",
+               "test_bounded_dynamic_pools_ada2005",
+               "test_bounded_dynamic_pools_ada2012",
+               "test_bounded_dynamic_pools_ada2022",
+               "binary_trees_basic_pool_ada95",
+               "binary_trees_basic_pool_ada2005",
+               "binary_trees_basic_pool_ada2012",
+               "binary_trees_basic_pool_ada2022",
+               "binary_trees_basic_bounded_pool_ada95",
+               "binary_trees_basic_bounded_pool_ada2005",
+               "binary_trees_basic_bounded_pool_ada2012",
+               "binary_trees_basic_bounded_pool_ada2022",
+               "binary_trees_with_subpools_ada95",
+               "binary_trees_with_subpools_ada2005",
+               "binary_trees_with_subpools_ada2012",
+               "binary_trees_with_subpools_ada2022",
+               "binary_trees_with_bounded_subpools_ada95",
+               "binary_trees_with_bounded_subpools_ada2005",
+               "binary_trees_with_bounded_subpools_ada2012",
+               "binary_trees_with_bounded_subpools_ada2022"]
