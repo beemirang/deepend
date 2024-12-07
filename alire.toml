@@ -1,6 +1,6 @@
 name = "deepend"
 description = "Bounded & Unbounded memory storage pools with subpool capabilities"
-version = "0.1.0-dev"
+version = "3.12"
 
 authors = ["Brad Moore"]
 maintainers = ["Brad Moore <bmoore.ada@gmail.com>"]
