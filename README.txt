@@ -26,30 +26,30 @@ of subpools. If subpools are not reclaimed prior to finalization of the
 pool, then they are reclaimed when the pool is finalized.
 
 Rather than deallocate items individually which is error prone and
-susceptible to memory leaks and other memory issues, a subpool can be 
-freed all at once automatically when the pool object goes out of scope. 
+susceptible to memory leaks and other memory issues, a subpool can be
+freed all at once automatically when the pool object goes out of scope.
 
-Have you ever wondered why Deallocating in Ada is called 
+Have you ever wondered why Deallocating in Ada is called
 Unchecked_Deallocation, or why Ada has a new operator, but not a delete
 operator?
 
-Part of the reason is that Ada was designed with safety in mind, and 
+Part of the reason is that Ada was designed with safety in mind, and
 heap deallocations are viewed as being error prone as they are in many
-languages. 
+languages.
 
-With this Storage pool, Unchecked_Deallocation is implemented as a No-Op 
+With this Storage pool, Unchecked_Deallocation is implemented as a No-Op
 (null procedure), because it is not needed or intended to be used.
 If early finalization is needed, Unchecked_Deallocate_Subpool may be
 used instead, which has similar issues as Unchecked_Deallocation, but is
 safer, since it can be applied more globally to the whole subpool rather
-than a specific object, and thus would be applied less frequently. Even 
-Unchecked_Deallocate_Subpool is unnecessary for reclaiming subpools in 
+than a specific object, and thus would be applied less frequently. Even
+Unchecked_Deallocate_Subpool is unnecessary for reclaiming subpools in
 nested scopes with Deepend, as a scoped subpool facility is also
 provided, which automatically finalizes subpools, when leaving the scope
 of their declaration.
 
 Subpool based storage management provides a safer means of memory
-management, which can outperform other mechanisms for storage 
+management, which can outperform other mechanisms for storage
 reclamation including garbage collection.
 
 Deepend is free software.  See the file COPYING for copying permission.
@@ -111,7 +111,7 @@ There are 4 Storage Pool packages to choose from in Deepend.
   Storage_Error exception is raised.
     A Bounded_Dynamic_Pools pool does not utilize the heap for its
   management of subpools.
-  
+
   Scoped_Subpool objects are provided that may be configured to allocate
   their storage from the heap, or declared on the stack, or statically
   at library level. In particular, Scoped_Subpool objects are included
@@ -151,7 +151,7 @@ There are 4 Storage Pool packages to choose from in Deepend.
   For Ada 95 and Ada 2005, a similar effect can be obtained by using the
   Allocate calls from the Subpool_Allocators nested package.
   However, these generics only allow allocating non-controlled objects
-  of non-limited types to a particular subpool, whereas in Ada 2012, 
+  of non-limited types to a particular subpool, whereas in Ada 2012,
   limited types and controlled types such as protected types may also be
   allocated to any subpool. Only task types or types that have tasks
   cannot be allocated to a subpool in Ada 2012.
@@ -168,14 +168,14 @@ There are 4 Storage Pool packages to choose from in Deepend.
   subpool, but one also allocate objects of limited types to any subpool,
   using the Ada 2012 subpool allocator syntax.
 
-4.0 BUILD INSTRUCTIONS 
+4.0 BUILD INSTRUCTIONS
 ======================
 
    -----------------------------------------------------------------
    -- Irvine ICC Ada 2005 Compiler ---------------------------------
    -----------------------------------------------------------------
 
-- For the Irvine ICC Ada 2005 compiler on  Windows, execute the 
+- For the Irvine ICC Ada 2005 compiler on  Windows, execute the
   following script to create the Ada 2005 versions of the executables;
 
    cd 2005
@@ -188,7 +188,7 @@ There are 4 Storage Pool packages to choose from in Deepend.
    icm make binary_trees_with_subpools_ada2005
    icm make bounded_binary_trees_with_subpools_ada2005
 
-- For the Irvine ICC Ada 2005 compiler on  Windows, execute the 
+- For the Irvine ICC Ada 2005 compiler on  Windows, execute the
   following script to create the Ada 95 versions of the executables;
 
    cd 95
@@ -202,16 +202,16 @@ There are 4 Storage Pool packages to choose from in Deepend.
    icm make bounded_binary_trees_wtih_subpools_ada95
 
   You can add other compile flags as well, such as
-      -compile_flags=\"-predef=(f32,lf64) -opt -debug -nochecks\"    
+      -compile_flags=\"-predef=(f32,lf64) -opt -debug -nochecks\"
 
   to turn on optimization, debug, and disable checks.
- 
+
   To compile for Irvine ICC on Linux, the script is the same, except
   that if compile options are used then the options should be enclosed
   with single quotes, and \" should be replaced with '"'.
 
   i.e.
-      -compile_flags='"-predef=(f32,lf64) -opt -debug -nochecks"'    
+      -compile_flags='"-predef=(f32,lf64) -opt -debug -nochecks"'
 
    -----------------------------------------------------------------
    -- ObjectAda Ada 2005 and Ada 95 --------------------------------
@@ -227,33 +227,49 @@ There are 4 Storage Pool packages to choose from in Deepend.
    - Execute the pathwin.bat file to setup the environment variables.
    - Execute
        make executable_name
-       
+
    Then supply the full path to each unit when prompted, which will
    occur for any ada source files that cannot be found in the current
    directory.
-   
+
    - Upon successful compilation and binding, then execute;
       lkc object
-      
+
       where object is the name of the object file produced by the
       make, which is abbreviated to fit an 8-3 MS-DOS file name.
       The .OBJ extention is optional and need not be specified at the
       command line.
-      
+
       The output of this command if successful is an executable.
 
    -----------------------------------------------------------------
    -- GNAT GPL, FSF, or PRO ------- --------------------------------
    -----------------------------------------------------------------
 
-- For GNAT Pro, GNAT GPL or GNAT AUX, load the appropriate .gpr file 
+- For GNAT Pro, GNAT GPL or GNAT AUX, load the appropriate .gpr file
   from either the 95, 2005, 2012, or 2022 sub-folder into the GPS ide,
   and build the executable from within the ide, or alternatively use
   gnatmake to perform the equivalent actions described in the .gpr file.
   You can also execute the master build for all projects by entering
   the following command from the command line from the root folder.
- 
-       gprbuild make_all.gpr
+
+       gprbuild deepend.gpr
+
+   -----------------------------------------------------------------
+   -- ALIRE crate          -------- --------------------------------
+   -----------------------------------------------------------------
+
+   for an ALIRE build, you need to ensure that the number of processors
+   for the compile is one, otherwise the build will likely fail. By
+   default the number of processors for gprbuild by alire is -j0 which
+   is the maximum possible number.
+   Thus to build the ALIRE create, issue the following command:
+
+      alr build -- -j1
+
+   To see the list of executables build, issue the following command:
+
+      alr run --list
 
 
 5.0 TESTED PLATFORMS
@@ -278,7 +294,7 @@ which present the same issues. It is similarly suspected that installing
 a later version of GCC on the Raspberry PI, such as FSF GCC 5.2.0, would
 correct these issues.
 
-Deepend is intended to be portable to any platform that supports 
+Deepend is intended to be portable to any platform that supports
 Ada95, Ada 2005, Ada 2012, or Ada 2022 compilation, and in theory, any
 Ada95, Ada 2005, Ada 2012, or Ada 2022 compiler should be able to compile
 the code since there are no dependencies on vendor specific run-time libraries.
@@ -293,7 +309,7 @@ For the Ada 95, and Ada 2005 versions of the packages, it is erroneous
 to allocate objects that need finalization (Tasks, protected objects,
 or objects of types inherited from types defined in Ada.Finalization)
 to a subpool and then Deallocate the subpool associated with those
-objects rather than wait for the pool finalization to occur. 
+objects rather than wait for the pool finalization to occur.
 
 For the Ada 2012, and Ada 2022 version of the packages, it is only
 erroneous to allocate task objects, or objects that contain tasks to a
@@ -311,24 +327,24 @@ Ada 2005 container libraries.
 The main differences between the Ada 2005 version and the Ada 2012
 version of the Dynamic_Pools package is that the Ada 2012 version
 takes advantages of the new features of the language, including
-defaults for discriminated types, functions with in out parameters 
+defaults for discriminated types, functions with in out parameters
 instead of access parameters, pre/post conditions, expression functions,
-subtype predicates, type invariants, simpler iterator syntax, 
+subtype predicates, type invariants, simpler iterator syntax,
 Storage_Pool aspects instead of pragmas, and most importantly
-utilization of the new standard subpools storage package, 
-Ada.Storage_Pools.Subpools. In Ada 2012, the Default_Storage_Pool 
+utilization of the new standard subpools storage package,
+Ada.Storage_Pools.Subpools. In Ada 2012, the Default_Storage_Pool
 pragma may be used to specify a Deepend pool as the default storage
 pool. See RM (13.11.3).
 
 7.0 TEST EXECUTABLES
 ====================
 
-A simple test executable test_dynamic_pools executable exercises the 
+A simple test executable test_dynamic_pools executable exercises the
 pool. There are Ada 95, Ada 2005, Ada 2012, and Ada 2022 versions of
 this test driver.
 
 In addition, there are binary_trees test executables with two different
-implementations of a benchmark test, for Ada 95, Ada 2005, Ada 2012, 
+implementations of a benchmark test, for Ada 95, Ada 2005, Ada 2012,
 and Ada 2022.
     - the implementations (bounded and unbounded) under the folder;
           nosubpools
@@ -336,7 +352,7 @@ and Ada 2022.
       Ada's access type finalization to release all objects from the
       subpool. This test utilizes the Basic_Dynamic_Pools package,
       and has been found to give the best test results for this
-      benchmark in Ada 95, Ada 2005 and Ada 2012 
+      benchmark in Ada 95, Ada 2005 and Ada 2012
     - the implementations (bounded and unbounded) under the folder;
            subpools
       performs all allocations using the Ada 2012 subpool allocator syntax,
@@ -345,7 +361,7 @@ and Ada 2022.
 
 8.0 WHY DEEPEND?
 ================
-  1) Its the end of the pool you'd expect to go to, if the pool is to 
+  1) Its the end of the pool you'd expect to go to, if the pool is to
      have subs floating in it.
   2) Hopefully it can be used to write deependable software.
   3) Hopefully it doesn't mean this is something the author has gone off of.
