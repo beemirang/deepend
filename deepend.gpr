@@ -1,7 +1,12 @@
 -- To execute this make file, type;
 --    gprbuild -Pmake_all.gpr
 
-aggregate project Make_All is
+aggregate project Deepend is
+
+   package Builder is
+     for Switches (others) use ("-jl1");
+   end  Builder;
+
    for Project_Files use (
      "./2022/test/subpools/bounded_binary_trees_ada2022.gpr",
      "./2022/test/subpools/binary_trees_ada2022.gpr",
@@ -28,4 +33,4 @@ aggregate project Make_All is
      "./2005/test/nosubpools/bounded_binary_trees_ada2005.gpr",
      "./2005/test/nosubpools/binary_trees_ada2005.gpr"
      );
-end Make_All;
+end Deepend;
