@@ -4,7 +4,7 @@
 aggregate project Deepend is
 
    package Builder is
-     for Switches (others) use ("-jl1");
+     for Switches (others) use ("-jc1", "-jb0", "-jl0");
    end  Builder;
 
    for Project_Files use (
