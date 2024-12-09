@@ -253,19 +253,59 @@ There are 4 Storage Pool packages to choose from in Deepend.
   You can also execute the master build for all projects by entering
   the following command from the command line from the root folder.
 
+  There are 3 environment variables that may be used to select which
+  test executables get built.
+
+  DEEPEND_ADA_STANDARD   - specifies which version of the Ada standard
+                           to use,
+                           options: Ada95, Ada2005, Ada2012, Ada2022, All
+                           (Default Ada 2012)
+  DEEPEND_POOL_VARIANT   - specifies whether basic pools, or subpool
+                           capable exes are built
+                           options: Basic, Subpools, All
+                           (Default Subpools)
+  DEEPEND_STORAGE_BOUNDS - specifies whether the unbounded or bounded
+                           storage pool executables should be built.
+                           options: Bounded, Unbounded, All
+                           (Default Unbounded)
+
+  See the deepend.gpr file for more details
+
        gprbuild deepend.gpr
 
    -----------------------------------------------------------------
    -- ALIRE crate          -------- --------------------------------
    -----------------------------------------------------------------
 
+  There are 3 environment variables that may be used to select which
+  test executables get built.
+
+  DEEPEND_ADA_STANDARD   - specifies which version of the Ada standard
+                           to use,
+                           options: Ada95, Ada2005, Ada2012, Ada2022, All
+                           (Default Ada 2012)
+  DEEPEND_POOL_VARIANT   - specifies whether basic pools, or subpool
+                           capable exes are built
+                           options: Basic, Subpools, All
+                           (Default Subpools)
+  DEEPEND_STORAGE_BOUNDS - specifies whether the unbounded or bounded
+                           storage pool executables should be built.
+                           options: Bounded, Unbounded, All
+                           (Default Unbounded)
+
+   To build the ALIRE Deepend crate, issue the following command:
+
+      alr build
+
+   For the ALIRE build, if the "All" variants are selected for the
+   DEEPEND environment variables described above
    for an ALIRE build, you need to ensure that the number of processors
    for the compile is one, otherwise the build will likely fail. By
    default the number of processors for gprbuild by alire is -j0 which
    is the maximum possible number.
-   Thus to build the ALIRE create, issue the following command:
+   Thus to build the ALIRE deepend crate, issue the following command:
 
-      alr build -- -j1
+   alr build -- -j1
 
    To see the list of executables build, issue the following command:
 
