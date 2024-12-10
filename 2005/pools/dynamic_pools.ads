@@ -347,7 +347,7 @@ package Dynamic_Pools is
    --  Default_Allocation_Block_Size value is used.
 
    generic
-      type Allocation_Type (<>) is private;
+      type Allocation_Type is private;
       type Allocation_Type_Access is access all Allocation_Type;
       Default_Value : Allocation_Type;
    package Subpool_Allocators is
