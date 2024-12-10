@@ -2,6 +2,14 @@ Deepend Version History.
 
 deepend-3.12 (Current Version)
 - Updated copyright headers
+- Ada 95 and Ada 2005 subpool generics do not support indefinite types,
+  so removed (<>) from formal generic parameters
+- Renamed make_all.gpr to deepend.gpr
+- Modified deepend.gpr to select a smaller
+  subset of test executables by default,
+  to build based on environment variable
+  settings. The full suite can still be
+  selected with the right settings
 
 deepend-3.11
 - Removed generic packages for the Ada 2012 and Ada 2022 Bounded Pools
