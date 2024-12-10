@@ -330,7 +330,7 @@ package Bounded_Dynamic_Pools is
      (Subpool : Scoped_Subpool) return Subpool_Handle;
 
    generic
-      type Allocation_Type (<>) is private;
+      type Allocation_Type is private;
       type Allocation_Type_Access is access all Allocation_Type;
       Default_Value : Allocation_Type;
    package Subpool_Allocators is
