@@ -26,7 +26,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Unchecked_Deallocation;
-with System.Address_To_Access_Conversions;
+with Ada.Unchecked_Conversion;
 
 package body Bounded_Dynamic_Pools is
 
@@ -475,8 +475,9 @@ package body Bounded_Dynamic_Pools is
 
    package body Subpool_Allocators is
 
-      package Subpool_Handle_Conversions is new
-        Address_To_Access_Conversions (Object => Allocation_Type);
+      function Convert is new
+        Ada.Unchecked_Conversion (Source => System.Address,
+                                  Target => Allocation_Type_Access);
 
       function Allocate
         (Subpool : Subpool_Handle;
@@ -494,12 +495,13 @@ package body Bounded_Dynamic_Pools is
             Subpool => Subpool);
 
          declare
-            Result : constant Allocation_Type_Access :=
-              Allocation_Type_Access
-                (Subpool_Handle_Conversions.To_Pointer (Location));
+            Loc : constant System.Address := Location;
+            Result : Allocation_Type;
+            for Result'Address use Loc;
+            pragma Import (C, Result);
          begin
-            Result.all := Value;
-            return Result;
+            Result := Value;
+            return Convert (Loc);
          end;
 
       end Allocate;
@@ -523,12 +525,13 @@ package body Bounded_Dynamic_Pools is
             Subpool => Subpool.Handle);
 
          declare
-            Result : constant Allocation_Type_Access :=
-              Allocation_Type_Access
-                (Subpool_Handle_Conversions.To_Pointer (Location));
+            Loc : constant System.Address := Location;
+            Result : Allocation_Type;
+            for Result'Address use Loc;
+            pragma Import (C, Result);
          begin
-            Result.all := Value;
-            return Result;
+            Result := Value;
+            return Convert (Loc);
          end;
 
       end Allocate;

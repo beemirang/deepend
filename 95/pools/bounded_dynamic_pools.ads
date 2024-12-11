@@ -328,7 +328,7 @@ package Bounded_Dynamic_Pools is
 
    generic
       type Allocation_Type is private;
-      type Allocation_Type_Access is access all Allocation_Type;
+      type Allocation_Type_Access is access Allocation_Type;
       Default_Value : Allocation_Type;
    package Subpool_Allocators is
 
