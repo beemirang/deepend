@@ -1,6 +1,9 @@
 Deepend Version History.
 
-deepend-3.12 (Current Version)
+deepend-3.13 (Current Version)
+- Added support for memory aligned type allocations
+
+deepend-3.12
 - Updated copyright headers
 - Ada 95 and Ada 2005 subpool generics do not support indefinite types,
   so removed (<>) from formal generic parameters
