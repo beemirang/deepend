@@ -42,32 +42,34 @@ package body Basic_Bounded_Dynamic_Pools is
       Size_In_Storage_Elements : Storage_Elements.Storage_Count;
       Alignment : Storage_Elements.Storage_Count)
    is
-      pragma Unreferenced (Alignment);
-   begin
+      Next_Address : constant System.Address :=
+        (if Pool.Heap_Allocated then
+            Pool.Active_Access (Pool.Next_Allocation)'Address
+         else
+            Pool.Active (Pool.Next_Allocation)'Address);
 
-      if Pool.Heap_Allocated then
+      Alignment_Offset : constant System.Storage_Elements.Storage_Offset
+        := (if Next_Address mod Alignment = 0 then 0
+            else Alignment - (Next_Address mod Alignment));
 
-         if Size_In_Storage_Elements >
-           Pool.Active_Access'Length - Pool.Next_Allocation
-         then
+      Remaining : constant System.Storage_Elements.Storage_Count :=
+        (if Pool.Heap_Allocated then
+            Pool.Active_Access'Length - Pool.Next_Allocation
+         else Pool.Active'Length - Pool.Next_Allocation);
 
-            raise Storage_Error;
-         end if;
+   begin -- Allocate
 
-         Storage_Address := Pool.Active_Access (Pool.Next_Allocation)'Address;
+      if Size_In_Storage_Elements + Alignment_Offset > Remaining then
 
-      else
-         if Size_In_Storage_Elements >
-           Pool.Active'Length - Pool.Next_Allocation
-         then
-
-            raise Storage_Error;
-         end if;
-
-         Storage_Address := Pool.Active (Pool.Next_Allocation)'Address;
+         raise Storage_Error with
+           "Size" & Size_In_Storage_Elements'Image & " > remaining" &
+           System.Storage_Elements.Storage_Offset'Image
+           (Remaining - Alignment_Offset);
       end if;
 
-      Pool.Next_Allocation := Pool.Next_Allocation + Size_In_Storage_Elements;
+      Storage_Address := Next_Address + Alignment_Offset;
+
+      Pool.Next_Allocation := @ + Size_In_Storage_Elements + Alignment_Offset;
 
    end Allocate;
 

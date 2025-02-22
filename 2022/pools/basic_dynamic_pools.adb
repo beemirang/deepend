@@ -44,13 +44,21 @@ package body Basic_Dynamic_Pools is
       Size_In_Storage_Elements : Storage_Elements.Storage_Count;
       Alignment : Storage_Elements.Storage_Count)
    is
-      pragma Unreferenced (Alignment);
+      Next_Address : System.Address :=
+        Pool.Active (Pool.Next_Allocation)'Address;
+
+      Alignment_Offset : System.Storage_Elements.Storage_Offset
+        := (if Next_Address mod Alignment = 0 then 0
+            else Alignment - (Next_Address mod Alignment));
+
+      Remaining : constant System.Storage_Elements.Storage_Count :=
+        Pool.Active'Length - Pool.Next_Allocation;
+
       use type Ada.Containers.Count_Type;
    begin
 
       --  If there's not enough space in the current hunk of memory
-      if Size_In_Storage_Elements > Pool.Active'Length - Pool.Next_Allocation
-      then
+      if Size_In_Storage_Elements + Alignment_Offset > Remaining then
 
          Pool.Used_List.Append (New_Item => Pool.Active);
 
@@ -66,11 +74,14 @@ package body Basic_Dynamic_Pools is
          end if;
 
          Pool.Next_Allocation := Pool.Active'First;
-
+         Next_Address := Pool.Active (Pool.Next_Allocation)'Address;
+         Alignment_Offset := (if Next_Address mod Alignment = 0 then 0
+                              else Alignment - (Next_Address mod Alignment));
       end if;
 
-      Storage_Address := Pool.Active (Pool.Next_Allocation)'Address;
-      Pool.Next_Allocation := Pool.Next_Allocation + Size_In_Storage_Elements;
+      Storage_Address := Next_Address + Alignment_Offset;
+
+      Pool.Next_Allocation := @ + Size_In_Storage_Elements + Alignment_Offset;
    end Allocate;
 
    --------------------------------------------------------------

@@ -131,18 +131,33 @@ package body Bounded_Dynamic_Pools is
       Alignment : Storage_Elements.Storage_Count;
       Subpool : not null Subpool_Handle)
    is
-      pragma Unreferenced (Alignment, Pool);
+      pragma Unreferenced (Pool);
       Sub : Dynamic_Subpool renames Dynamic_Subpool (Subpool.all);
-   begin
+
+      Next_Address : constant System.Address :=
+        Sub.Active (Sub.Next_Allocation)'Address;
+
+      Alignment_Offset : constant System.Storage_Elements.Storage_Offset
+        := (if Next_Address mod Alignment = 0 then 0
+            else Alignment - (Next_Address mod Alignment));
+
+      Remaining : constant System.Storage_Elements.Storage_Count :=
+        Sub.Active'Length - Sub.Next_Allocation;
+
+   begin --  Allocate_From_Subpool
 
       --  If there's not enough space in the current hunk of memory
-      if Size_In_Storage_Elements > Sub.Active'Length - Sub.Next_Allocation
-      then
-         raise Storage_Error;
+      if Size_In_Storage_Elements + Alignment_Offset > Remaining then
+         raise Storage_Error with "Size" & Size_In_Storage_Elements'Image &
+              " > remaining" &
+           System.Storage_Elements.Storage_Offset'Image
+             (Remaining - Alignment_Offset);
       end if;
 
-      Storage_Address := Sub.Active (Sub.Next_Allocation)'Address;
-      Sub.Next_Allocation := Sub.Next_Allocation + Size_In_Storage_Elements;
+      Storage_Address := Next_Address + Alignment_Offset;
+
+      Sub.Next_Allocation := @ + Size_In_Storage_Elements + Alignment_Offset;
+
    end Allocate_From_Subpool;
 
    --------------------------------------------------------------

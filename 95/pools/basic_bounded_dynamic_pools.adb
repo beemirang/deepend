@@ -41,34 +41,55 @@ package body Basic_Bounded_Dynamic_Pools is
       Size_In_Storage_Elements : Storage_Elements.Storage_Count;
       Alignment : Storage_Elements.Storage_Count)
    is
-      pragma Unreferenced (Alignment);
-   begin
+      function Get_Next_Address return System.Address is
+      begin
+         if Pool.Heap_Allocated then
+            return Pool.Active_Access (Pool.Next_Allocation)'Address;
+         else
+            return Pool.Active (Pool.Next_Allocation)'Address;
+         end if;
+      end Get_Next_Address;
+
+      Next_Address : constant System.Address :=
+        Get_Next_Address;
+
+      function Get_Alignment_Offset
+        return System.Storage_Elements.Storage_Offset is
+      begin
+         if Next_Address mod Alignment = 0 then
+            return 0;
+         else
+            return Alignment - (Next_Address mod Alignment);
+         end if;
+      end Get_Alignment_Offset;
+
+      Alignment_Offset : constant System.Storage_Elements.Storage_Offset
+        := Get_Alignment_Offset;
+
+      function Get_Remaining return System.Storage_Elements.Storage_Count is
+      begin
+         if Pool.Heap_Allocated then
+            return Pool.Active_Access'Length - Pool.Next_Allocation;
+         else
+            return Pool.Active'Length - Pool.Next_Allocation;
+         end if;
+      end Get_Remaining;
+
+      Remaining : constant System.Storage_Elements.Storage_Count :=
+        Get_Remaining;
+
+   begin -- Allocate
 
       pragma Assert (Is_Owner (Pool, Current_Task));
 
-      if Pool.Heap_Allocated then
-
-         if Size_In_Storage_Elements >
-           Pool.Active_Access'Length - Pool.Next_Allocation
-         then
-
-            raise Storage_Error;
-         end if;
-
-         Storage_Address := Pool.Active_Access (Pool.Next_Allocation)'Address;
-
-      else
-         if Size_In_Storage_Elements >
-           Pool.Active'Length - Pool.Next_Allocation
-         then
-
-            raise Storage_Error;
-         end if;
-
-         Storage_Address := Pool.Active (Pool.Next_Allocation)'Address;
+      if Size_In_Storage_Elements + Alignment_Offset > Remaining then
+         raise Storage_Error;
       end if;
 
-      Pool.Next_Allocation := Pool.Next_Allocation + Size_In_Storage_Elements;
+      Storage_Address := Next_Address + Alignment_Offset;
+
+      Pool.Next_Allocation := Pool.Next_Allocation +
+        Size_In_Storage_Elements + Alignment_Offset;
 
    end Allocate;
 

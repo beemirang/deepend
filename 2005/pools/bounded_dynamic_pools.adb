@@ -145,20 +145,46 @@ package body Bounded_Dynamic_Pools is
       Alignment : Storage_Elements.Storage_Count;
       Subpool : not null Subpool_Handle)
    is
-      pragma Unreferenced (Alignment, Pool);
+      pragma Unreferenced (Pool);
       Sub : Dynamic_Subpool renames Dynamic_Subpool (Subpool.all);
-   begin
+
+      Next_Address : constant System.Address :=
+        Sub.Active (Sub.Next_Allocation)'Address;
+
+      function Get_Alignment_Offset
+        return System.Storage_Elements.Storage_Offset is
+      begin
+         if Next_Address mod Alignment = 0 then
+            return 0;
+         else
+            return Alignment - (Next_Address mod Alignment);
+         end if;
+      end Get_Alignment_Offset;
+
+      Alignment_Offset : constant System.Storage_Elements.Storage_Offset
+        := Get_Alignment_Offset;
+
+      Remaining : constant System.Storage_Elements.Storage_Count :=
+        Sub.Active'Length - Sub.Next_Allocation;
+
+   begin --  Allocate_From_Subpool
 
       pragma Assert (Is_Owner (Subpool, Current_Task));
 
       --  If there's not enough space in the current hunk of memory
-      if Size_In_Storage_Elements > Sub.Active'Length - Sub.Next_Allocation
-      then
-         raise Storage_Error;
+      if Size_In_Storage_Elements + Alignment_Offset > Remaining then
+         raise Storage_Error with "Size" &
+           Storage_Elements.Storage_Count'Image (Size_In_Storage_Elements) &
+              " > remaining" &
+           System.Storage_Elements.Storage_Offset'Image
+             (Remaining - Alignment_Offset);
       end if;
 
-      Storage_Address := Sub.Active (Sub.Next_Allocation)'Address;
-      Sub.Next_Allocation := Sub.Next_Allocation + Size_In_Storage_Elements;
+      Storage_Address := Next_Address + Alignment_Offset;
+
+      Sub.Next_Allocation :=
+        Sub.Next_Allocation + Size_In_Storage_Elements + Alignment_Offset;
+
    end Allocate_From_Subpool;
 
    --------------------------------------------------------------
@@ -168,7 +194,7 @@ package body Bounded_Dynamic_Pools is
       New_Item : Dynamic_Subpool_Access) is
    begin
       if Container.Last = Container.Subpool_List'Length then
-          raise Storage_Error;
+          raise Storage_Error with "No available subpools";
       end if;
 
       Container.Last := Container.Last + 1;

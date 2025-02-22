@@ -68,7 +68,7 @@ package body Sys.Storage_Pools.Subpools is
      (Pool : not null access Root_Storage_Pool_With_Subpools)
       return not null Subpool_Handle is
    begin
-      raise Program_Error;
+      raise Program_Error with "Default subpools not implemented in Ada 2005";
       return Default_Subpool_For_Pool (Pool);
    end Default_Subpool_For_Pool;
 

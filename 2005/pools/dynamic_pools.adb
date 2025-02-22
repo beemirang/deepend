@@ -152,16 +152,35 @@ package body Dynamic_Pools is
       Alignment : Storage_Elements.Storage_Count;
       Subpool : not null Subpool_Handle)
    is
-      pragma Unreferenced (Alignment, Pool);
+      pragma Unreferenced (Pool);
       use type Ada.Containers.Count_Type;
       Sub : Dynamic_Subpool renames Dynamic_Subpool (Subpool.all);
-   begin
+
+      Next_Address : System.Address :=
+        Sub.Active (Sub.Next_Allocation)'Address;
+
+      function Get_Alignment_Offset
+        return System.Storage_Elements.Storage_Offset is
+      begin
+         if Next_Address mod Alignment = 0 then
+            return 0;
+         else
+            return Alignment - (Next_Address mod Alignment);
+         end if;
+      end Get_Alignment_Offset;
+
+      Alignment_Offset : System.Storage_Elements.Storage_Offset
+        := Get_Alignment_Offset;
+
+      Remaining : constant System.Storage_Elements.Storage_Count :=
+        Sub.Active'Length - Sub.Next_Allocation;
+
+   begin --  Allocate_From_Subpool
 
       pragma Assert (Is_Owner (Subpool, Current_Task));
 
       --  If there's not enough space in the current hunk of memory
-      if Size_In_Storage_Elements > Sub.Active'Length - Sub.Next_Allocation
-      then
+      if Size_In_Storage_Elements + Alignment_Offset > Remaining then
 
          Sub.Used_List.Append (New_Item => Sub.Active);
 
@@ -177,11 +196,15 @@ package body Dynamic_Pools is
          end if;
 
          Sub.Next_Allocation := Sub.Active'First;
+         Next_Address := Sub.Active (Sub.Next_Allocation)'Address;
+         Alignment_Offset := Get_Alignment_Offset;
 
       end if;
 
-      Storage_Address := Sub.Active (Sub.Next_Allocation)'Address;
-      Sub.Next_Allocation := Sub.Next_Allocation + Size_In_Storage_Elements;
+      Storage_Address := Next_Address + Alignment_Offset;
+      Sub.Next_Allocation :=
+        Sub.Next_Allocation + Size_In_Storage_Elements + Alignment_Offset;
+
    end Allocate_From_Subpool;
 
    --------------------------------------------------------------
@@ -227,7 +250,7 @@ package body Dynamic_Pools is
            Owner => Ada.Task_Identification.Current_Task);
 
       Result : constant Subpool_Handle := Subpool_Handle (New_Pool);
-   begin
+   begin  --  Create_Subpool
 
       Pool.Subpools.Add (New_Pool);
 
