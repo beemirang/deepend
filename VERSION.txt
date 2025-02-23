@@ -2,6 +2,7 @@ Deepend Version History.
 
 deepend-3.13 (Current Version)
 - Added support for memory aligned type allocations
+- Make better use of Ada 2012 and Ada 2022 new language features
 
 deepend-3.12
 - Updated copyright headers
