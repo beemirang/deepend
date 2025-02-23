@@ -127,6 +127,7 @@ package body Dynamic_Pools is
    is
       pragma Unreferenced (Pool);
       use type Ada.Containers.Count_Type;
+
       Sub : Dynamic_Subpool renames Dynamic_Subpool (Subpool.all);
 
       Next_Address : System.Address :=
@@ -177,22 +178,6 @@ package body Dynamic_Pools is
    begin
       Pool.Default_Subpool := Pool.Create_Subpool;
    end Create_Default_Subpool;
-
-   --------------------------------------------------------------
-
-   overriding
-   function Create_Subpool
-     (Pool : in out Dynamic_Pool) return not null Subpool_Handle is
-   begin
-
-      return Create_Subpool
-        (Pool,
-         (if Pool.Default_Block_Size = 0 then
-             Default_Allocation_Block_Size
-          else
-             Pool.Default_Block_Size));
-
-   end Create_Subpool;
 
    --------------------------------------------------------------
 

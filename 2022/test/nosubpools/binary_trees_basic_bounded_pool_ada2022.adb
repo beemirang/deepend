@@ -70,36 +70,25 @@ with System.Multiprocessors;
 procedure Binary_Trees_Basic_Bounded_Pool_Ada2022 is
 
    Default_Depth : constant := 20;
-
-   function Get_Depth return Positive is
-   begin
-      if Argument_Count > 0 then
-         return Positive'Value (Argument (1));
-      else
-         return Default_Depth;
-      end if;
-   end Get_Depth;
-
-   function Get_Worker_Count (Iterations : Positive) return Positive is
-   begin
-      if Argument_Count > 1 then
-         return Positive'Value (Argument (2));
-      else
-         return Positive'Min
-           (Iterations,
-            Positive (System.Multiprocessors.Number_Of_CPUs) +
-              (Iterations mod Positive
-                 (System.Multiprocessors.Number_Of_CPUs)));
-      end if;
-   end Get_Worker_Count;
-
    Min_Depth     : constant := 4;
-   Requested_Depth : constant Positive := Get_Depth;
-   Max_Depth     : constant Positive := Positive'Max (Min_Depth + 2,
-                                                      Requested_Depth);
+
+   Requested_Depth : constant Positive :=
+     (if Argument_Count > 0 then Positive'Value (Argument (1))
+      else Default_Depth);
+
+   Max_Depth     : constant Positive :=
+     Positive'Max (Min_Depth + 2, Requested_Depth);
+
    Depth_Iterations : constant Positive := (Max_Depth - Min_Depth) / 2 + 1;
 
-   Worker_Count     : constant Positive := Get_Worker_Count (Depth_Iterations);
+   Worker_Count     : constant Positive :=
+     (if Argument_Count > 1 then Positive'Value (Argument (2))
+      else
+         Positive'Min
+           (Depth_Iterations,
+         Positive (System.Multiprocessors.Number_Of_CPUs) +
+             (Depth_Iterations mod Positive
+              (System.Multiprocessors.Number_Of_CPUs))));
 
    task type Depth_Worker
      (Start, Finish : Positive := Positive'Last) is
@@ -116,7 +105,7 @@ procedure Binary_Trees_Basic_Bounded_Pool_Ada2022 is
       Depth         : Natural;
       Check         : Integer;
       Iterations    : Positive;
-   begin
+   begin -- Depth_Worker
 
       for Depth_Iter in Start .. Finish loop
 
@@ -178,11 +167,8 @@ procedure Binary_Trees_Basic_Bounded_Pool_Ada2022 is
    Start_Index         : Positive := 1;
    End_Index           : Positive := Depth_Iterations;
 
-   Iterations_Per_Task : constant Positive :=
-     Depth_Iterations / Worker_Count;
-
-   Remainder           : Natural :=
-     Depth_Iterations rem Worker_Count;
+   Iterations_Per_Task : constant Positive := Depth_Iterations / Worker_Count;
+   Remainder           : Natural := Depth_Iterations rem Worker_Count;
 
    function Create_Worker return Depth_Worker is
    begin
@@ -211,14 +197,15 @@ procedure Binary_Trees_Basic_Bounded_Pool_Ada2022 is
    type Long_Lived_Tree_Node is access Trees.Tree_Node
      with Storage_Pool => Long_Lived_Tree_Pool;
 
-   package Long_Lived_Tree_Creator is new Trees.Creation
-     (Long_Lived_Tree_Node);
+   package Long_Lived_Tree_Creator is new
+     Trees.Creation (Long_Lived_Tree_Node);
 
    Long_Lived_Tree : Long_Lived_Tree_Node;
 
    Check : Integer;
 
-begin
+begin --  Binary_Trees_Basic_Bounded_Pool_Ada2022
+
    --  The main task relinquishes ownership of the default subpool.
    Set_Owner (Pool => Long_Lived_Tree_Pool,
               T => Null_Task_Id);
@@ -226,8 +213,7 @@ begin
    --  Do the stretch tree processing at the same time that the long lived
    --  tree is being created.
    declare
-      task Stretch_Depth_Task is
-      end Stretch_Depth_Task;
+      task Stretch_Depth_Task;
 
       task body Stretch_Depth_Task is
 
@@ -248,7 +234,7 @@ begin
          Stretch_Tree : constant Stretch_Node :=
            Stretch_Tree_Creator.Create (Item  => 0,
                                         Depth => Stretch_Depth);
-      begin
+      begin --  Stretch_Depth_Task
          Check        := Trees.Item_Check (Stretch_Tree);
          Put ("stretch tree of depth ");
          Put (Item => Stretch_Depth, Width => 1);
@@ -284,8 +270,7 @@ begin
 
    --  Now process the trees of different sizes in parallel and collect results
    declare
-      Workers : array (Worker_Id) of Depth_Worker
-        := [others => Create_Worker];
+      Workers : array (Worker_Id) of Depth_Worker := [others => Create_Worker];
       pragma Unreferenced (Workers);
    begin
       null;

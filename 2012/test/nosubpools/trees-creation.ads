@@ -15,4 +15,15 @@ package Trees.Creation is
      (Item : Integer;
       Depth : Integer) return Tree_Node_Access;
 
+private
+
+   function Create (Item : Integer;
+                    Depth : Integer) return Tree_Node_Access is
+     (new Tree_Node'
+        (Left  => (if Depth <= 0 then null
+                   else Create (2 * Item - 1, Depth - 1).all'Unchecked_Access),
+         Right => (if Depth <= 0 then null
+                   else Create (2 * Item, Depth - 1).all'Unchecked_Access),
+         Value => Item));
+
 end Trees.Creation;

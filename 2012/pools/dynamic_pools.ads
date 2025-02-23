@@ -486,4 +486,13 @@ private
      (Pool : Dynamic_Pool) return Boolean is
       (Pool.Default_Subpool /= null);
 
+   overriding function Create_Subpool (Pool : in out Dynamic_Pool)
+                                       return not null Subpool_Handle is
+      (Create_Subpool
+        (Pool,
+         (if Pool.Default_Block_Size = 0 then
+             Default_Allocation_Block_Size
+          else
+             Pool.Default_Block_Size)));
+
 end Dynamic_Pools;

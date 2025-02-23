@@ -28,24 +28,22 @@
 with Ada.Unchecked_Deallocation;
 
 package body Bounded_Dynamic_Pools is
+
    procedure Free_Subpool is new Ada.Unchecked_Deallocation
      (Object => Dynamic_Subpool,
       Name => Dynamic_Subpool_Access);
 
-   function Storage_Size
-     (Subpool : not null Dynamic_Subpool_Access)
-      return Storage_Elements.Storage_Count is
+   function Storage_Size (Subpool : not null Dynamic_Subpool_Access)
+                          return Storage_Elements.Storage_Count is
      (Subpool.Size);
 
-   function Storage_Used
-     (Subpool : not null Dynamic_Subpool_Access)
-      return Storage_Elements.Storage_Count is
+   function Storage_Used (Subpool : not null Dynamic_Subpool_Access)
+                          return Storage_Elements.Storage_Count is
      (Subpool.Next_Allocation - 1);
 
    protected body Subpool_Set is
 
-      function Active_Subpools return Containers.Count_Type is
-        (Count);
+      function Active_Subpools return Containers.Count_Type is (Count);
 
       --------------------------------------------------------------
 
@@ -171,22 +169,6 @@ package body Bounded_Dynamic_Pools is
 
    --------------------------------------------------------------
 
-   overriding
-   function Create_Subpool
-     (Pool : in out Dynamic_Pool) return not null Subpool_Handle is
-   begin
-
-      return Create_Subpool
-        (Pool,
-         (if Pool.Default_Subpool_Size = 0 then
-             Default_Subpool_Default_Size
-          else
-             Pool.Default_Subpool_Size));
-
-   end Create_Subpool;
-
-   --------------------------------------------------------------
-
    not overriding
    function Create_Subpool
      (Pool : in out Dynamic_Pool;
@@ -204,14 +186,13 @@ package body Bounded_Dynamic_Pools is
            Reclaimed => False);
 
       Result : constant Subpool_Handle := Subpool_Handle (New_Pool);
-   begin
+
+   begin --  Create_Subpool
 
       Pool.Subpools.Add (New_Pool);
 
-      Storage_Pools.Subpools.Set_Pool_Of_Subpool
-        (Subpool => Result,
-         To => Pool);
-
+      Storage_Pools.Subpools.Set_Pool_Of_Subpool (Subpool => Result,
+                                                  To      => Pool);
       return Result;
 
    end Create_Subpool;

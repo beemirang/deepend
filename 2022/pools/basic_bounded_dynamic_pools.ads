@@ -290,4 +290,17 @@ private
    overriding
    procedure Finalize   (Pool : in out Basic_Dynamic_Pool) with Inline;
 
+   function Storage_Used (Pool : Basic_Dynamic_Pool)
+                          return Storage_Elements.Storage_Count is
+     (Pool.Next_Allocation - 1);
+
+   overriding
+   function Storage_Size (Pool : Basic_Dynamic_Pool)
+                          return Storage_Elements.Storage_Count is
+     (Pool.Size);
+
+   function Is_Owner (Pool : Basic_Dynamic_Pool;
+                      T : Task_Id := Current_Task) return Boolean is
+     (Pool.Owner = T);
+
 end Basic_Bounded_Dynamic_Pools;

@@ -100,39 +100,11 @@ package body Basic_Bounded_Dynamic_Pools is
 
    --------------------------------------------------------------
 
-   function Is_Owner
-     (Pool : Basic_Dynamic_Pool;
-      T : Task_Id := Current_Task) return Boolean is
-   begin
-      return (Pool.Owner = T);
-   end Is_Owner;
-
-   --------------------------------------------------------------
-
    procedure Set_Owner
      (Pool : in out Basic_Dynamic_Pool;
       T : Task_Id := Current_Task) is
    begin
       Pool.Owner := T;
    end Set_Owner;
-
-   --------------------------------------------------------------
-
-   overriding
-   function Storage_Size
-     (Pool : Basic_Dynamic_Pool)
-      return Storage_Elements.Storage_Count is
-   begin
-      return Pool.Size;
-   end Storage_Size;
-
-   --------------------------------------------------------------
-
-   function Storage_Used
-     (Pool : Basic_Dynamic_Pool)
-      return Storage_Elements.Storage_Count is
-   begin
-      return Pool.Next_Allocation - 1;
-   end Storage_Used;
 
 end Basic_Bounded_Dynamic_Pools;

@@ -12,39 +12,18 @@ package body Bounded_Trees_Ada2022 is
    function Create
      (Subpool : Subpool_Handle;
       Item : Integer;
-      Depth : Integer) return Tree_Node is
-
-      function Recurse
-        (Item : Integer;
-         Depth : Integer) return Tree_Node
-      is
-         function Allocate_Node return Tree_Node is (new (Subpool) Node);
-
-         Result : constant Tree_Node := Allocate_Node;
-      begin
-
-         if Depth > 0 then
-            Result.all := (Left => Recurse (2 * Item - 1, Depth - 1),
-                           Right => Recurse (2 * Item, Depth - 1),
-                           Value => Item);
-         else
-            Result.all := (Left | Right => null, Value => Item);
-         end if;
-
-         return Result;
-
-      end Recurse;
-
+      Depth : Integer) return Tree_Node
+   is
+      function Recurse (Item : Integer;
+                        Depth : Integer) return Tree_Node is
+        (new (Subpool)
+            Node'(Left  => (if Depth > 0 then Recurse (2 * Item - 1, Depth - 1)
+                            else null),
+                  Right => (if Depth > 0 then Recurse (2 * Item, Depth - 1)
+                            else null),
+                  Value => Item));
    begin
       return Recurse (Item, Depth);
    end Create;
 
-   function Item_Check (Item : Tree_Node) return Integer is
-   begin
-      if Item.Left = null then
-         return Item.Value;
-      else
-         return Item.Value + Item_Check (Item.Left) - Item_Check (Item.Right);
-      end if;
-   end Item_Check;
 end Bounded_Trees_Ada2022;

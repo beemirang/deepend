@@ -486,4 +486,36 @@ private
      (Pool : Dynamic_Pool) return Boolean is
       (Pool.Default_Subpool /= null);
 
+   function Storage_Used (Subpool : not null Dynamic_Subpool_Access)
+                          return Storage_Elements.Storage_Count is
+      ([for E of Subpool.Used_List => E.all'Length]'Reduce ("+", 0)
+       + Subpool.Next_Allocation - 1);
+
+   function Storage_Used (Subpool : not null Subpool_Handle)
+                          return Storage_Elements.Storage_Count is
+     (declare The_Subpool : constant Dynamic_Subpool_Access :=
+        Dynamic_Subpool_Access (Subpool);
+      begin Storage_Used (The_Subpool));
+
+   function Storage_Size (Subpool : not null Dynamic_Subpool_Access)
+                          return Storage_Elements.Storage_Count is
+     ([for E of Subpool.Used_List => E.all'Length]'Reduce ("+", 0) +
+      [for E of Subpool.Free_List => E.all'Length]'Reduce ("+", 0) +
+      Subpool.Active'Length);
+
+   function Storage_Size (Subpool : not null Subpool_Handle)
+                          return Storage_Elements.Storage_Count is
+     (declare The_Subpool : constant Dynamic_Subpool_Access :=
+        Dynamic_Subpool_Access (Subpool);
+      begin Storage_Size (The_Subpool));
+
+   overriding function Create_Subpool (Pool : in out Dynamic_Pool)
+                                       return not null Subpool_Handle is
+      (Create_Subpool
+        (Pool,
+         (if Pool.Default_Block_Size = 0 then
+             Default_Allocation_Block_Size
+          else
+             Pool.Default_Block_Size)));
+
 end Dynamic_Pools;

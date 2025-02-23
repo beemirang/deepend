@@ -55,7 +55,8 @@ package body Basic_Dynamic_Pools is
         Pool.Active'Length - Pool.Next_Allocation;
 
       use type Ada.Containers.Count_Type;
-   begin
+
+   begin --  Allocate
 
       --  If there's not enough space in the current hunk of memory
       if Size_In_Storage_Elements + Alignment_Offset > Remaining then
@@ -113,15 +114,6 @@ package body Basic_Dynamic_Pools is
       Pool.Next_Allocation := 1;
       Pool.Owner := Ada.Task_Identification.Current_Task;
    end Initialize;
-
-   --------------------------------------------------------------
-
-   function Is_Owner
-     (Pool : Basic_Dynamic_Pool;
-      T : Task_Id := Current_Task) return Boolean is
-   begin
-      return (Pool.Owner = T);
-   end Is_Owner;
 
    --------------------------------------------------------------
 

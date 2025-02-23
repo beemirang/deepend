@@ -28,30 +28,28 @@
 with Ada.Unchecked_Deallocation;
 
 package body Bounded_Dynamic_Pools is
+
    procedure Free_Subpool is new Ada.Unchecked_Deallocation
      (Object => Dynamic_Subpool,
       Name => Dynamic_Subpool_Access);
 
-   function Storage_Size
-     (Subpool : not null Dynamic_Subpool_Access)
-      return Storage_Elements.Storage_Count is
+   function Storage_Size (Subpool : not null Dynamic_Subpool_Access)
+                          return Storage_Elements.Storage_Count is
      (Subpool.Size);
 
-   function Storage_Used
-     (Subpool : not null Dynamic_Subpool_Access)
-      return Storage_Elements.Storage_Count is
+   function Storage_Used (Subpool : not null Dynamic_Subpool_Access)
+                          return Storage_Elements.Storage_Count is
      (Subpool.Next_Allocation - 1);
 
    protected body Subpool_Set is
 
-      function Active_Subpools return Containers.Count_Type is
-        (Count);
+      function Active_Subpools return Containers.Count_Type is (Count);
 
       --------------------------------------------------------------
 
       procedure Add (Subpool : Dynamic_Subpool_Access) is
       begin
-         Count := Count + 1;
+         Count := @ + 1;
          Subpools (Count) := Subpool;
       end Add;
 
@@ -71,37 +69,19 @@ package body Bounded_Dynamic_Pools is
          if Position /= 0 then
             Subpools (Position .. Count - 1) :=
               Subpools (Position + 1 .. Count);
-            Count := Count - 1;
+            Count := @ - 1;
          end if;
       end Delete;
 
       --------------------------------------------------------------
 
-      function Storage_Total return Storage_Elements.Storage_Count
-      is
-         Result : Storage_Elements.Storage_Count := 0;
-      begin
-
-         for E in 1 .. Count loop
-            Result := Result + Storage_Size (Subpools (E));
-         end loop;
-
-         return Result;
-      end Storage_Total;
+      function Storage_Total return Storage_Elements.Storage_Count is
+        ([for E in 1 .. Count => Storage_Size (Subpools (E))]'Reduce ("+", 0));
 
       --------------------------------------------------------------
 
-      function Storage_Usage return Storage_Elements.Storage_Count
-      is
-         Result : Storage_Elements.Storage_Count := 0;
-      begin
-
-         for E in 1 .. Count loop
-            Result := Result + Storage_Used (Subpools (E));
-         end loop;
-
-         return Result;
-      end Storage_Usage;
+      function Storage_Usage return Storage_Elements.Storage_Count is
+        ([for E in 1 .. Count => Storage_Used (Subpools (E))]'Reduce ("+", 0));
 
    end Subpool_Set;
 
@@ -170,22 +150,6 @@ package body Bounded_Dynamic_Pools is
 
    --------------------------------------------------------------
 
-   overriding
-   function Create_Subpool
-     (Pool : in out Dynamic_Pool) return not null Subpool_Handle is
-   begin
-
-      return Create_Subpool
-        (Pool,
-         (if Pool.Default_Subpool_Size = 0 then
-             Default_Subpool_Default_Size
-          else
-             Pool.Default_Subpool_Size));
-
-   end Create_Subpool;
-
-   --------------------------------------------------------------
-
    not overriding
    function Create_Subpool
      (Pool : in out Dynamic_Pool;
@@ -203,14 +167,13 @@ package body Bounded_Dynamic_Pools is
            Reclaimed => False);
 
       Result : constant Subpool_Handle := Subpool_Handle (New_Pool);
-   begin
+
+   begin --  Create_Subpool
 
       Pool.Subpools.Add (New_Pool);
 
-      Storage_Pools.Subpools.Set_Pool_Of_Subpool
-        (Subpool => Result,
-         To => Pool);
-
+      Storage_Pools.Subpools.Set_Pool_Of_Subpool (Subpool => Result,
+                                                  To      => Pool);
       return Result;
 
    end Create_Subpool;

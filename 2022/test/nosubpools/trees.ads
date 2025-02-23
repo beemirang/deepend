@@ -27,4 +27,8 @@ private
    Node_Size : constant Storage_Elements.Storage_Count :=
      Tree_Node'Max_Size_In_Storage_Elements;
 
+   function Item_Check (Item : access Tree_Node) return Integer is
+      (if Item.Left = null then Item.Value
+       else Item.Value + Item_Check (Item.Left) - Item_Check (Item.Right));
+
 end Trees;

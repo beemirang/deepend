@@ -69,36 +69,24 @@ procedure Binary_Trees_With_Bounded_Subpools_Ada2012 is
    pragma Default_Storage_Pool (Trees.Pool);
 
    Default_Depth : constant := 20;
-
-   function Get_Depth return Positive is
-   begin
-      if Argument_Count > 0 then
-         return Positive'Value (Argument (1));
-      else
-         return Default_Depth;
-      end if;
-   end Get_Depth;
-
-   function Get_Worker_Count (Iterations : Positive) return Positive is
-   begin
-      if Argument_Count > 1 then
-         return Positive'Value (Argument (2));
-      else
-         return Positive'Min
-           (Iterations,
-            Positive (System.Multiprocessors.Number_Of_CPUs) +
-              (Iterations mod Positive
-                 (System.Multiprocessors.Number_Of_CPUs)));
-      end if;
-   end Get_Worker_Count;
-
    Min_Depth     : constant := 4;
-   Requested_Depth : constant Positive := Get_Depth;
+
+   Requested_Depth : constant Positive :=
+     (if Argument_Count > 0 then Positive'Value (Argument (1))
+      else Default_Depth);
+
    Max_Depth     : constant Positive := Positive'Max (Min_Depth + 2,
                                                       Requested_Depth);
    Depth_Iterations : constant Positive := (Max_Depth - Min_Depth) / 2 + 1;
 
-   Worker_Count     : constant Positive := Get_Worker_Count (Depth_Iterations);
+   Worker_Count     : constant Positive :=
+     (if Argument_Count > 1 then Positive'Value (Argument (2))
+      else
+         Positive'Min
+           (Depth_Iterations,
+         Positive (System.Multiprocessors.Number_Of_CPUs) +
+             (Depth_Iterations mod Positive
+              (System.Multiprocessors.Number_Of_CPUs))));
 
    task type Depth_Worker
      (Start, Finish : Positive := Positive'Last) is
@@ -115,8 +103,9 @@ procedure Binary_Trees_With_Bounded_Subpools_Ada2012 is
       Depth         : Natural;
       Check         : Integer;
       Iterations    : Positive;
-   begin
+   begin --  Depth_Worker
 
+      Chunk_Loop :
       for Depth_Iter in Start .. Finish loop
 
          Depth := Min_Depth + (Depth_Iter - 1) * 2;
@@ -125,7 +114,9 @@ procedure Binary_Trees_With_Bounded_Subpools_Ada2012 is
 
          Check      := 0;
 
+         Iteration_Loop :
          for I in 1 .. Iterations loop
+            Iteration :
             declare
                pragma Suppress (Accessibility_Check);
 
@@ -142,7 +133,7 @@ procedure Binary_Trees_With_Bounded_Subpools_Ada2012 is
                pragma Unsuppress (Accessibility_Check);
 
                Short_Lived_Tree_1, Short_Lived_Tree_2 : Trees.Tree_Node;
-            begin
+            begin --  Iteration
 
                Short_Lived_Tree_1 :=
                  Trees.Create
@@ -160,11 +151,11 @@ procedure Binary_Trees_With_Bounded_Subpools_Ada2012 is
                  Trees.Item_Check (Short_Lived_Tree_1) +
                  Trees.Item_Check (Short_Lived_Tree_2);
 
-            end;
-         end loop;
+            end Iteration;
+         end loop Iteration_Loop;
 
          Results (Depth_Iter) := Check;
-      end loop;
+      end loop Chunk_Loop;
 
    exception
       when E : others =>
@@ -178,11 +169,8 @@ procedure Binary_Trees_With_Bounded_Subpools_Ada2012 is
    Start_Index         : Positive := 1;
    End_Index           : Positive := Depth_Iterations;
 
-   Iterations_Per_Task : constant Positive :=
-     Depth_Iterations / Worker_Count;
-
-   Remainder           : Natural :=
-     Depth_Iterations rem Worker_Count;
+   Iterations_Per_Task : constant Positive := Depth_Iterations / Worker_Count;
+   Remainder           : Natural := Depth_Iterations rem Worker_Count;
 
    function Create_Worker return Depth_Worker
    is
@@ -203,17 +191,15 @@ procedure Binary_Trees_With_Bounded_Subpools_Ada2012 is
       end return;
    end Create_Worker;
 
-   Long_Lived_Tree      : Trees.Tree_Node;
+   Long_Lived_Tree : Trees.Tree_Node;
+   Check           : Integer;
 
-   Check : Integer;
-
-begin
+begin --  Binary_Trees_With_Bounded_Subpools_Ada2012
 
    --  Do the stretch tree processing at the same time that the long lived
    --  tree is being created.
    declare
-      task Stretch_Depth_Task is
-      end Stretch_Depth_Task;
+      task Stretch_Depth_Task;
 
       task body Stretch_Depth_Task is
          Stretch_Depth : constant Positive := Max_Depth + 1;
@@ -235,7 +221,9 @@ begin
            Trees.Create (Subpool  => Subpool.Handle,
                          Item  => 0,
                          Depth => Stretch_Depth);
-      begin
+
+      begin --  Stretch_Depth_Task
+
          Check        := Trees.Item_Check (Stretch_Tree);
          Put ("stretch tree of depth ");
          Put (Item => Stretch_Depth, Width => 1);
@@ -250,8 +238,7 @@ begin
               ("Stretch Depth Task Failed: " & Exception_Information (E));
       end Stretch_Depth_Task;
 
-      task Create_Long_Lived_Tree_Task is
-      end Create_Long_Lived_Tree_Task;
+      task Create_Long_Lived_Tree_Task;
 
       task body Create_Long_Lived_Tree_Task is
          Subpool : constant Bounded_Dynamic_Pools.Subpool_Handle
@@ -277,8 +264,7 @@ begin
    declare
       pragma Suppress (Accessibility_Check);
 
-      Workers : array (Worker_Id) of Depth_Worker
-        := (others => Create_Worker);
+      Workers : array (Worker_Id) of Depth_Worker := (others => Create_Worker);
       pragma Unreferenced (Workers);
    begin
       null;
