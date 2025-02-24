@@ -53,8 +53,6 @@ package body Basic_Bounded_Dynamic_Pools is
 
       Next_Address : constant System.Address := Get_Next_Address;
 
-      use type System.Storage_Elements.Storage_Count;
-
       function Get_Alignment_Offset
         return System.Storage_Elements.Storage_Offset
       is
