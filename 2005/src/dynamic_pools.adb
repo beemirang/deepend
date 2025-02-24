@@ -334,6 +334,14 @@ package body Dynamic_Pools is
 
    --------------------------------------------------------------
 
+   procedure Free_Storage_Element (Position : Storage_Vector.Cursor) is
+       Storage : Storage_Array_Access := Storage_Vector.Element (Position);
+   begin
+      Free_Storage_Array (Storage);
+   end Free_Storage_Element;
+
+   --------------------------------------------------------------
+
    function Has_Default_Subpool
      (Pool : Dynamic_Pool) return Boolean
    is
@@ -356,14 +364,6 @@ package body Dynamic_Pools is
 
       end Finalize;
    end Scoped_Subpools;
-
-   --------------------------------------------------------------
-
-   procedure Free_Storage_Element (Position : Storage_Vector.Cursor) is
-       Storage : Storage_Array_Access := Storage_Vector.Element (Position);
-   begin
-      Free_Storage_Array (Storage);
-   end Free_Storage_Element;
 
    --------------------------------------------------------------
 

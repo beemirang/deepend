@@ -368,10 +368,10 @@ private
       Reusable : Boolean) is
      new Storage_Pools.Subpools.Root_Subpool with
       record
-         Active : Storage_Array (1 .. Size);
          Next_Allocation : Storage_Array_Index;
          Owner : Ada.Task_Identification.Task_Id;
          Reclaimed : Boolean;
+         Active : Storage_Array (1 .. Size);
       end record;
 
    type Scoped_Subpool
@@ -421,8 +421,8 @@ private
      is new Storage_Pools.Subpools.Root_Storage_Pool_With_Subpools
    with record
       Default_Subpool : Dynamic_Subpool_Access;
-      Subpools : Subpool_Set (Maximum_Subpools);
       Owner : Ada.Task_Identification.Task_Id;
+      Subpools : Subpool_Set (Maximum_Subpools);
    end record;
 
    overriding

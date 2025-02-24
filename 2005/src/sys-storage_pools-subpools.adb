@@ -41,6 +41,14 @@ package body Sys.Storage_Pools.Subpools is
       null;
    end Allocate;
 
+   function Default_Subpool_For_Pool
+     (Pool : not null access Root_Storage_Pool_With_Subpools)
+      return not null Subpool_Handle is
+   begin
+      raise Program_Error with "Default subpools not implemented in Ada 2005";
+      return Default_Subpool_For_Pool (Pool);
+   end Default_Subpool_For_Pool;
+
    function Pool_Of_Subpool
      (Subpool : not null Subpool_Handle)
       return access Root_Storage_Pool_With_Subpools'Class is
@@ -63,13 +71,5 @@ package body Sys.Storage_Pools.Subpools is
    begin
       return Storage_Count'Last;
    end Storage_Size;
-
-   function Default_Subpool_For_Pool
-     (Pool : not null access Root_Storage_Pool_With_Subpools)
-      return not null Subpool_Handle is
-   begin
-      raise Program_Error with "Default subpools not implemented in Ada 2005";
-      return Default_Subpool_For_Pool (Pool);
-   end Default_Subpool_For_Pool;
 
 end Sys.Storage_Pools.Subpools;

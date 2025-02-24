@@ -2,23 +2,40 @@ library project Deepend is
 
    type Ada_Standard is
       ("Ada95", "Ada2005", "Ada2012", "Ada2022");
-
    Ada_Version : Ada_Standard := external ("DEEPEND_ADA_STANDARD", "Ada2012");
+   for Languages use ("Ada");
+   for Library_Name use "Deepend";
+   for Object_Dir use "obj";
+   for Library_Dir use "lib";
+   for Library_Kind use "static";
 
-    for Languages use ("Ada");
-    for Library_Name use "Deepend";
-    for Object_Dir use "obj";
-    for Library_Dir use "lib";
-    for Library_Kind use "Static";
+   case Ada_Version is
 
-    case Ada_Version is
-       when "Ada95" =>
-           for Source_Dirs use ("95/src");
-       when "Ada2005" =>
-           for Source_Dirs use ("2005/src");
-       when "Ada2012" =>
-           for Source_Dirs use ("2012/src");
-       when "Ada2022" =>
-           for Source_Dirs use ("2022/src");
+      when "Ada95" =>
+         for Source_Dirs use ("95/src");
+
+      when "Ada2005" =>
+         for Source_Dirs use ("2005/src");
+
+      when "Ada2012" =>
+         for Source_Dirs use ("2012/src");
+
+      when "Ada2022" =>
+         for Source_Dirs use ("2022/src");
    end case;
+
+   package Compiler is
+      case Ada_Version is
+         when "Ada95" =>
+             for Switches ("ada") use ("-gnatf", "-gnata", "-gnat95", "-gnatwa.f.g.kh.o_p_q.w", "-gnatyaAbBcdDefhiIklM79noOprStuxz");
+         when "Ada2005" =>
+             for Switches ("ada") use ("-gnatf", "-gnata", "-gnat2005", "-gnatwa.f.g.kh.o_p_q.w", "-gnatyaAbBcdDefhiIklM79noOprStuxz");
+         when "Ada2012" =>
+             for Switches ("ada") use ("-gnatf", "-gnata", "-gnat2012", "-gnatwa.f.g.kh.o_p_q.w", "-gnatyaAbBcdDefhiIklM79noOprStuxz");
+         when "Ada2022" =>
+             for Switches ("ada") use ("-gnatf", "-gnata", "-gnat2022", "-gnatwa.f.g.kh.o_p_q.w", "-gnatyaAbBcdDefhiIklM79noOprStuxz");
+      end case;
+   end Compiler;
+
 end Deepend;
+

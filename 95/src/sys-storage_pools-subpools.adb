@@ -49,6 +49,14 @@ package body Sys.Storage_Pools.Subpools is
       null;
    end Deallocate;
 
+   function Default_Subpool_For_Pool
+     (Pool : access Root_Storage_Pool_With_Subpools)
+      return Subpool_Handle is
+   begin
+      raise Program_Error;
+      return null;
+   end Default_Subpool_For_Pool;
+
    function Pool_Of_Subpool
      (Subpool : Subpool_Handle)
       return Root_Storage_Pool_With_Subpools_Class_Access is
@@ -70,13 +78,5 @@ package body Sys.Storage_Pools.Subpools is
    begin
       return Storage_Count'Last;
    end Storage_Size;
-
-   function Default_Subpool_For_Pool
-     (Pool : access Root_Storage_Pool_With_Subpools)
-      return Subpool_Handle is
-   begin
-      raise Program_Error;
-      return null;
-   end Default_Subpool_For_Pool;
 
 end Sys.Storage_Pools.Subpools;

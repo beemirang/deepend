@@ -53,7 +53,7 @@ package body Basic_Bounded_Dynamic_Pools is
       Next_Address : constant System.Address :=
         Get_Next_Address;
 
-      function Get_Alignment_Offset
+      function Get_Next_Address_Alignment_Offset
         return System.Storage_Elements.Storage_Offset is
       begin
          if Next_Address mod Alignment = 0 then
@@ -61,10 +61,10 @@ package body Basic_Bounded_Dynamic_Pools is
          else
             return Alignment - (Next_Address mod Alignment);
          end if;
-      end Get_Alignment_Offset;
+      end Get_Next_Address_Alignment_Offset;
 
       Alignment_Offset : constant System.Storage_Elements.Storage_Offset
-        := Get_Alignment_Offset;
+        := Get_Next_Address_Alignment_Offset;
 
       function Get_Remaining return System.Storage_Elements.Storage_Count is
       begin
