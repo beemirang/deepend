@@ -1,8 +1,14 @@
 library project Deepend is
 
+   --  Set environment variable, DEEPEND_ADA_STANDARD, to a version
+   --  of the Ada Programming Language standard that your compiler
+   --  supports, if needed. (Defaults to Ada 2012, which adds better
+   --  support for subpool storage pools)
+
    type Ada_Standard is
       ("Ada95", "Ada2005", "Ada2012", "Ada2022");
    Ada_Version : Ada_Standard := external ("DEEPEND_ADA_STANDARD", "Ada2012");
+
    for Languages use ("Ada");
    for Library_Name use "Deepend";
    for Object_Dir use "obj";
