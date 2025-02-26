@@ -27,6 +27,7 @@
 with Bounded_Dynamic_Pools;
 with Ada.Text_IO; use Ada.Text_IO;
 with System.Storage_Elements; use System;
+with System.Address_Image;
 
 procedure Test_Bounded_Dynamic_Pools_Ada2005
 is
@@ -37,7 +38,9 @@ is
       Maximum_Subpools =>
         Bounded_Dynamic_Pools.Default_Maximum_Subpool_Count);
 
-   subtype Id_String is String (1 .. 10);
+   type Id_String is new String (1 .. 10);
+   pragma Pack (Id_String);
+
    type Id_String_Access is access all Id_String;
    for Id_String_Access'Storage_Pool use Pool;
    pragma No_Strict_Aliasing (Id_String_Access);
@@ -64,10 +67,10 @@ is
                  Description => null,
                  Next        => null));
 
-   type Ordinary_Type is
-      record
-         Value : Integer;
-      end record;
+   Ordinary_Alignment : constant := 4;
+   type Ordinary_Type is range 0 .. 2**16 - 1;
+   for Ordinary_Type'Alignment use Ordinary_Alignment;
+   for Ordinary_Type'Size use 16;
 
    type O_Access is access all Ordinary_Type;
    for O_Access'Storage_Pool use Pool;
@@ -76,7 +79,7 @@ is
    package Allocators is new Bounded_Dynamic_Pools.Subpool_Allocators
      (Ordinary_Type,
       O_Access,
-      Ordinary_Type'(Value => 0));
+      Ordinary_Type'(0));
 
    package Id_String_Allocators is new Bounded_Dynamic_Pools.Subpool_Allocators
      (Allocation_Type        => Id_String,
@@ -122,7 +125,7 @@ is
 
       Put_Line (Integer'Image (List.Value) &
                 ", Name=<" & List.Name.all &
-                ">, Desc=<" & List.Description.all & '>');
+                ">, Desc=<" & String (List.Description.all) & '>');
    end Print;
 
    procedure Deallocate_Default_Subpool
@@ -139,7 +142,7 @@ is
 
       pragma Warnings (On, "*Default_Subpool*modified*but*n* referenced*");
 
-      Put_Line ("Bytes Stored=" &
+      Put_Line ("Storage Used=" &
                 Storage_Elements.Storage_Count'Image (Pool.Storage_Used));
    end Deallocate_Default_Subpool;
 
@@ -148,7 +151,7 @@ is
 
    use type System.Storage_Elements.Storage_Offset;
 
-begin
+begin --  Test_Bounded_Dynamic_Pools_Ada2005
 
    New_Line;
    Put_Line ("Initial Storage Used=" &
@@ -184,8 +187,10 @@ begin
         (Pool.Storage_Used - Bounded_Dynamic_Pools.Storage_Used
            (Subpool => Pool.Default_Subpool_For_Pool)));
 
+   Nested_Subpool_Tests :
    begin
 
+      Nested_Normal_Subpool_Test :
       declare
          Sub_Pool : Bounded_Dynamic_Pools.Subpool_Handle
            := Bounded_Dynamic_Pools.Create_Subpool (Pool'Access);
@@ -211,8 +216,10 @@ begin
          pragma Warnings (Off, "*Sub_Pool* modified*but*n* referenced*");
          Bounded_Dynamic_Pools.Unchecked_Deallocate_Subpool (Sub_Pool);
          pragma Warnings (On, "*Sub_Pool* modified*but*n* referenced*");
-      end;
 
+      end Nested_Normal_Subpool_Test;
+
+      Nested_Scoped_Subpool_Test :
       declare
          Sub_Pool : Bounded_Dynamic_Pools.Scoped_Subpool
            (Pool => Pool'Access,
@@ -235,11 +242,12 @@ begin
          Put_Line ("Bytes Stored Before Finalization=" &
                      Storage_Elements.Storage_Count'Image (Pool.Storage_Used));
 
-      end;
+      end Nested_Scoped_Subpool_Test;
 
       Put_Line ("Bytes Stored After Finalization=" &
                   Storage_Elements.Storage_Count'Image (Pool.Storage_Used));
-   end;
+
+   end Nested_Subpool_Tests;
 
    Print (List.all);
 
@@ -254,14 +262,28 @@ begin
         (Bounded_Dynamic_Pools.Storage_Used
            (Subpool => Pool.Default_Subpool_For_Pool)));
 
-   pragma Warnings (Off, "*Object*is assigned but never read*");
    declare
       Object : O_Access;
+      Id     : Id_String_Access;
    begin
       Put_Line ("Allocating some more objects to the default subpool");
+      Put_Line ("Allocating an object with an odd number of bytes");
+
+      Id := new Id_String'("123456789A"); -- Allocate object of odd length
+      Put_Line ("Id'Address=" & System.Address_Image (Id.all'Address));
+
+      --  Check that we can allocate objects that require word alignment
+      --  after having allocated something with an odd length
+
+      Put_Line ("Now allocating objects that require word alignment");
 
       for I in 1 .. 10 loop
-         Object := new Ordinary_Type;
+         Object := new Ordinary_Type'(Ordinary_Type (I));
+
+         Put_Line ("Object'Address=" &
+                     System.Address_Image (Object.all'Address));
+         pragma Assert (Object.all'Address mod Ordinary_Alignment = 4
+                        and then Object.all = Ordinary_Type (I));
       end loop;
 
       Put_Line ("Bytes Stored=" &
@@ -271,9 +293,8 @@ begin
         ("Bytes Stored in Default Subpool=" &
            Storage_Elements.Storage_Count'Image
            (Bounded_Dynamic_Pools.Storage_Used
-              (Subpool => Pool.Default_Subpool_For_Pool)));
+                (Subpool => Pool.Default_Subpool_For_Pool)));
    end;
-   pragma Warnings (On, "*Object*is assigned but never read*");
 
    Put_Line ("Deallocating Default Subpool again");
 

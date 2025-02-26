@@ -42,7 +42,8 @@ is
                                               Maximum_Subpools => 100);
    pragma Default_Storage_Pool (Pool);
 
-   subtype Id_String is String (1 .. 10);
+   type Id_String is new String (1 .. 10);
+   pragma Pack (Id_String);
    type Id_String_Access is access Id_String with Storage_Pool => Pool;
 
    type String_Access is access String with Storage_Pool => Pool;
@@ -56,10 +57,10 @@ is
 
    type Node_Access is access Node_Type with Storage_Pool => Pool;
 
-   type Ordinary_Type is
-      record
-         Value : Integer;
-      end record;
+   Ordinary_Alignment : constant := 4;
+   type Ordinary_Type is range 0 .. 2**16 - 1 with
+      Alignment => Ordinary_Alignment,
+      Size      => 16;
 
    type Reference_Counted_Type is new Ada.Finalization.Controlled with
       record
@@ -110,7 +111,7 @@ is
         new String'("Depth=" & Natural'Image (Depth));
 
       Description : constant Id_String_Access
-      := new (Sub_Pool) String'("ABCDEFGHIJ");
+        := new (Sub_Pool) Id_String'("ABCDEFGHIJ");
 
    begin
       if Depth = 0 then
@@ -137,7 +138,7 @@ is
 
       Put_Line (Integer'Image (List.Value) &
                 ", Name=<" & List.Name.all &
-                ">, Desc=<" & List.Description.all & '>');
+                ">, Desc=<" & String (List.Description.all) & '>');
    end Print;
 
    procedure Deallocate_Default_Subpool
@@ -154,7 +155,7 @@ is
 
       pragma Warnings (On, "*Default_Subpool*modified*but*n* referenced*");
 
-      Put_Line ("Bytes Stored=" & Pool.Storage_Used'Image);
+      Put_Line ("Storage Used=" & Pool.Storage_Used'Image);
    end Deallocate_Default_Subpool;
 
    List : Node_Access;
@@ -221,7 +222,7 @@ begin --  Test_Bounded_Dynamic_Pools_Ada2012
            Reference_Counted_Type;
       end loop;
 
-      Put_Line ("Object Count=" & Natural'Image (Object_Count));
+      Put_Line ("Object Count=" & Object_Count'Image);
       Put_Line ("Bytes Stored=" & Pool.Storage_Used'Image);
 
       Put_Line ("Deallocating Subpool...");
@@ -273,8 +274,10 @@ begin --  Test_Bounded_Dynamic_Pools_Ada2012
    Put_Line ("After Finalization, Object Count=" & Object_Count'Image);
    Put_Line ("Bytes Stored=" & Pool.Storage_Used'Image);
 
+   Nested_Subpool_Tests :
    begin
 
+      Nested_Normal_Subpool_Test :
       declare
          Sub_Pool : Bounded_Dynamic_Pools.Subpool_Handle
            := Bounded_Dynamic_Pools.Create_Subpool (Pool);
@@ -285,21 +288,22 @@ begin --  Test_Bounded_Dynamic_Pools_Ada2012
          for I in 1 .. 10 loop
             declare
                Object : constant O_Access
-                 := new (Sub_Pool) Ordinary_Type'(Value => I);
+                 := new (Sub_Pool) Ordinary_Type'(Ordinary_Type (I));
             begin
-               Put_Line ("Object Value=" & Object.Value'Image);
+               Put_Line ("Object Value=" & Object.all'Image);
             end;
          end loop;
 
          Put_Line ("Bytes Stored=" & Pool.Storage_Used'Image);
-
          Put_Line ("Deallocating Subpool...");
 
          pragma Warnings (Off, "*Sub_Pool* modified*but*n* referenced*");
          Bounded_Dynamic_Pools.Unchecked_Deallocate_Subpool (Sub_Pool);
          pragma Warnings (On, "*Sub_Pool* modified*but*n* referenced*");
-      end;
 
+      end Nested_Normal_Subpool_Test;
+
+      Nested_Scoped_Subpool_Test :
       declare
          pragma Suppress (Accessibility_Check);
 
@@ -308,7 +312,6 @@ begin --  Test_Bounded_Dynamic_Pools_Ada2012
              (Pool, 1000);
 
          pragma Unsuppress (Accessibility_Check);
-
       begin
 
          Put_Line ("Allocating objects to a new scoped subpool");
@@ -316,7 +319,7 @@ begin --  Test_Bounded_Dynamic_Pools_Ada2012
          for I in 1 .. 10 loop
             declare
                Object : constant O_Access
-                 := new (Sub_Pool.Handle) Ordinary_Type'(Value => I);
+                 := new (Sub_Pool.Handle) Ordinary_Type'(Ordinary_Type (I));
 
                pragma Unreferenced (Object);
             begin
@@ -327,10 +330,10 @@ begin --  Test_Bounded_Dynamic_Pools_Ada2012
          Put_Line
            ("Bytes Stored Before Finalization=" & Pool.Storage_Used'Image);
 
-      end;
+      end Nested_Scoped_Subpool_Test;
 
       Put_Line ("Bytes Stored After Finalization=" & Pool.Storage_Used'Image);
-   end;
+   end Nested_Subpool_Tests;
 
    Print (List.all);
 
@@ -344,15 +347,27 @@ begin --  Test_Bounded_Dynamic_Pools_Ada2012
         Bounded_Dynamic_Pools.Storage_Used
         (Subpool => Pool.Default_Subpool_For_Pool)'Image);
 
-   pragma Warnings (Off, "*Object*is assigned but never read*");
    declare
       Object : RC_Access;
+      Id     : Id_String_Access;
    begin
       Put_Line ("Allocating some more objects needing finalization " &
                   "to the default subpool");
+      Put_Line ("Allocating an object with an odd number of bytes");
+
+      Id := new Id_String'("123456789A"); -- Allocate object of odd length
+      Put_Line ("Id'Address=" & Id.all'Address'Image);
+
+      --  Check that we can allocate objects that require word alignment
+      --  after having allocated something with an odd length
+
+      Put_Line ("Now allocating objects that require word alignment");
 
       for I in 1 .. 10 loop
          Object := new Reference_Counted_Type;
+         Put_Line ("Object'Address=" & Object.all'Address'Image);
+         pragma Assert (Object.all'Address mod Ordinary_Alignment = 4
+                        and then Object.all.Value = I);
       end loop;
 
       Put_Line ("Object Count=" & Object_Count'Image);
@@ -363,7 +378,6 @@ begin --  Test_Bounded_Dynamic_Pools_Ada2012
            Bounded_Dynamic_Pools.Storage_Used
            (Subpool => Pool.Default_Subpool_For_Pool)'Image);
    end;
-   pragma Warnings (On, "*Object*is assigned but never read*");
 
    Put_Line ("Deallocating Default Subpool again");
 

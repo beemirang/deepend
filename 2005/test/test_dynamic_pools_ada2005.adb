@@ -1,6 +1,6 @@
 ------------------------------------------------------------------------------
 --                                                                          --
---     Deepend - Dynamic Storage Pools for Ada 95, 2005, 2012, and 2022
+--     Deepend - Dynamic Storage Pools for Ada 95, 2005, 2012, and 2022     --
 --                                                                          --
 --           T E S T _ D Y N A M I C _ P O O L S _ A D A 2 0 0 5            --
 --                                                                          --
@@ -27,6 +27,7 @@
 with Dynamic_Pools; use Dynamic_Pools;
 with Ada.Text_IO; use Ada.Text_IO;
 with System.Storage_Elements; use System;
+with System.Address_Image;
 
 procedure Test_Dynamic_Pools_Ada2005
 is
@@ -34,7 +35,9 @@ is
    Pool : aliased Dynamic_Pools.Dynamic_Pool
      (Default_Block_Size => Dynamic_Pools.Default_Allocation_Block_Size);
 
-   subtype Id_String is String (1 .. 10);
+   type Id_String is new String (1 .. 10);
+   pragma Pack (Id_String);
+
    type Id_String_Access is access all Id_String;
    for Id_String_Access'Storage_Pool use Pool;
 
@@ -59,10 +62,10 @@ is
                  Description => null,
                  Next        => null));
 
-   type Ordinary_Type is
-      record
-         Value : Integer;
-      end record;
+   Ordinary_Alignment : constant := 4;
+   type Ordinary_Type is range 0 .. 2**16 - 1;
+   for Ordinary_Type'Alignment use Ordinary_Alignment;
+   for Ordinary_Type'Size use 16;
 
    type O_Access is access all Ordinary_Type;
    for O_Access'Storage_Pool use Pool;
@@ -70,7 +73,7 @@ is
    package Allocators is new Dynamic_Pools.Subpool_Allocators
      (Ordinary_Type,
       O_Access,
-      Ordinary_Type'(Value => 0));
+      Ordinary_Type'(0));
 
    package Id_String_Allocators is new Dynamic_Pools.Subpool_Allocators
      (Allocation_Type        => Id_String,
@@ -116,7 +119,7 @@ is
 
       Put_Line (Integer'Image (List.Value) &
                 ", Name=<" & List.Name.all &
-                ">, Desc=<" & List.Description.all & '>');
+                ">, Desc=<" & String (List.Description.all) & '>');
    end Print;
 
    procedure Deallocate_Default_Subpool
@@ -144,7 +147,7 @@ is
 
    use type System.Storage_Elements.Storage_Offset;
 
-begin
+begin --  Test_Dynamic_Pools_Ada2005
 
    New_Line;
    Put_Line ("Initial Storage Used=" &
@@ -180,8 +183,10 @@ begin
         (Pool.Storage_Used - Dynamic_Pools.Storage_Used
            (Subpool => Pool.Default_Subpool_For_Pool)));
 
+   Nested_Subpool_Tests :
    begin
 
+      Nested_Normal_Subpool_Test :
       declare
          Sub_Pool : Dynamic_Pools.Subpool_Handle
            := Dynamic_Pools.Create_Subpool (Pool'Access);
@@ -207,8 +212,10 @@ begin
          pragma Warnings (Off, "*Sub_Pool* modified*but*n* referenced*");
          Dynamic_Pools.Unchecked_Deallocate_Subpool (Sub_Pool);
          pragma Warnings (On, "*Sub_Pool* modified*but*n* referenced*");
-      end;
 
+      end Nested_Normal_Subpool_Test;
+
+      Nested_Scoped_Subpool_Test :
       declare
          Sub_Pool : constant Dynamic_Pools.Scoped_Subpool
            := Dynamic_Pools.Create_Subpool (Pool'Access);
@@ -229,17 +236,18 @@ begin
          Put_Line ("Bytes Stored Before Finalization=" &
                      Storage_Elements.Storage_Count'Image (Pool.Storage_Used));
 
-      end;
+      end Nested_Scoped_Subpool_Test;
 
       Put_Line ("Bytes Stored After Finalization=" &
                   Storage_Elements.Storage_Count'Image (Pool.Storage_Used));
-   end;
+
+   end Nested_Subpool_Tests;
 
    Print (List.all);
 
    Deallocate_Default_Subpool;
 
-   --  Reinstate a default subpool;
+   --  Reinstate a default subpool
    Pool.Create_Default_Subpool;
 
    Put_Line
@@ -251,11 +259,26 @@ begin
    pragma Warnings (Off, "*Object*is assigned but never read*");
    declare
       Object : O_Access;
+      Id     : Id_String_Access;
    begin
       Put_Line ("Allocating some more objects to the default subpool");
+      Put_Line ("Allocating an object with an odd number of bytes");
+
+      Id := new Id_String'("123456789A"); -- Allocate object of odd length
+      Put_Line ("Id'Address=" & System.Address_Image (Id.all'Address));
+
+      --  Check that we can allocate objects that require word alignment
+      --  after having allocated something with an odd length
+
+      Put_Line ("Now allocating objects that require word alignment");
 
       for I in 1 .. 10 loop
-         Object := new Ordinary_Type;
+         Object := new Ordinary_Type'(Ordinary_Type (I));
+
+         Put_Line ("Object'Address=" &
+                     System.Address_Image (Object.all'Address));
+         pragma Assert (Object.all'Address mod Ordinary_Alignment = 4
+                        and then Object.all = Ordinary_Type (I));
       end loop;
 
       Put_Line ("Bytes Stored=" &
