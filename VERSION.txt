@@ -5,6 +5,7 @@ deepend-3.13 (Current Version)
 - Make better use of Ada 2012 and Ada 2022 new language features
 - Restructured folder names, and added project to build as a library
 - Address compiler warnings
+- Added tests for memory alignment
 
 deepend-3.12
 - Updated copyright headers
