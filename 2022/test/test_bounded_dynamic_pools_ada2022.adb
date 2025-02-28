@@ -261,12 +261,6 @@ begin --  Test_Bounded_Dynamic_Pools_Ada2012
       Put_Line ("Object Count=" & Object_Count'Image);
       Put_Line ("Bytes Stored=" & Pool.Storage_Used'Image);
 
-      Put_Line ("Deallocating Subpool...");
-
-      --  Bounded_Dynamic_Pools.Unchecked_Deallocate_Subpool (Sub_Pool.Handle);
-
-      Put_Line ("Object Count=" & Object_Count'Image);
-      Put_Line ("Bytes Stored=" & Pool.Storage_Used'Image);
    end;
 
    pragma Warnings (On, "*Object*is*never read*");
@@ -364,9 +358,18 @@ begin --  Test_Bounded_Dynamic_Pools_Ada2012
       Put_Line ("Now allocating objects that require word alignment");
 
       for I in 1 .. 10 loop
-         Object := new Reference_Counted_Type;
-         Put_Line ("Object'Address=" & Object.all'Address'Image);
-         pragma Assert (Object.all'Address mod Ordinary_Alignment = 4
+         Object := new
+           Reference_Counted_Type'
+             (Ada.Finalization.Controlled with Value => I);
+
+         --  In this loop we are allocating initialized objects, so
+         --  Initialize does not get called to increment the object count.
+         --  We have do that here, explicitly.
+         Object_Count := @ + 1;
+
+         Put_Line ("Object'Address=" & Object.all'Address'Image  &
+                     ", I=" & I'Image & ", Value=" & Object.all.Value'Image);
+         pragma Assert (Object.all'Address mod Ordinary_Alignment = 0
                         and then Object.all.Value = I);
       end loop;
 

@@ -278,7 +278,7 @@ begin --  Test_Dynamic_Pools_Ada95
 
          Put_Line ("Object'Address=" &
                      System.Address_Image (Object.all'Address));
-         pragma Assert (Object.all'Address mod Ordinary_Alignment = 4
+         pragma Assert (Object.all'Address mod Ordinary_Alignment = 0
                         and then Object.all = Ordinary_Type (I));
       end loop;
 

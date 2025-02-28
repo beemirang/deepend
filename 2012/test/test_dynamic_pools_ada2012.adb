@@ -110,7 +110,7 @@ is
         new String'("Depth=" & Natural'Image (Depth));
 
       Description : constant Id_String_Access
-      := new (Sub_Pool) Id_String'("ABCDEFGHIJ");
+        := new (Sub_Pool) Id_String'("ABCDEFGHIJ");
 
    begin
       if Depth = 0 then
@@ -372,10 +372,18 @@ begin --  Test_Dynamic_Pools_Ada2012
       Put_Line ("Now allocating objects that require word alignment");
 
       for I in 1 .. 10 loop
-         Object := new Reference_Counted_Type;
+         Object := new
+           Reference_Counted_Type'
+             (Ada.Finalization.Controlled with Value => I);
+
+         --  In this loop we are allocating initialized objects, so
+         --  Initialize does not get called to increment the object count.
+         --  We have do that here, explicitly.
+         Object_Count := Object_Count + 1;
+
          Put_Line ("Object'Address=" &
                      System.Address_Image (Object.all'Address));
-         pragma Assert (Object.all'Address mod Ordinary_Alignment = 4
+         pragma Assert (Object.all'Address mod Ordinary_Alignment = 0
                         and then Object.all.Value = I);
       end loop;
 
