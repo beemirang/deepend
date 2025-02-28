@@ -1,47 +1,533 @@
-library project Deepend is
+-- To execute this make file, type;
+--    gprbuild -Pmake_all.gpr
 
-   --  Set environment variable, DEEPEND_ADA_STANDARD, to a version
-   --  of the Ada Programming Language standard that your compiler
-   --  supports, if needed. (Defaults to Ada 2012, which adds better
-   --  support for subpool storage pools)
+aggregate project Deepend is
 
    type Ada_Standard is
-      ("Ada95", "Ada2005", "Ada2012", "Ada2022");
+      ("Ada95", "Ada2005", "Ada2012", "Ada2022", "All");
    Ada_Version : Ada_Standard := external ("DEEPEND_ADA_STANDARD", "Ada2012");
 
-   for Languages use ("Ada");
-   for Library_Name use "Deepend";
-   for Object_Dir use "obj";
-   for Library_Dir use "lib";
-   for Library_Kind use "static";
+   type Pool_Variant is
+      ("Basic", "Subpools", "All");
+   Variant : Pool_Variant := external ("DEEPEND_POOL_VARIANT", "Subpools");
+
+   type Storage_Bounds is
+      ("Bounded", "Unbounded", "All");
+   Bounds : Storage_Bounds := external ("DEEPEND_STORAGE_BOUNDS", "Bounded");
+
+   package Builder is
+     for Switches (others) use ("-jc1", "-jb0", "-jl0");
+   end  Builder;
 
    case Ada_Version is
 
       when "Ada95" =>
-         for Source_Dirs use ("95/src");
+      
+         case Variant is
+            when "Basic" =>
+               case Bounds is
 
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./95/test/test_bounded_dynamic_pools_ada95.gpr",
+                       "./95/test/nosubpools/bounded_binary_trees_ada95.gpr",
+                       "./95/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./95/test/test_dynamic_pools_ada95.gpr",
+                       "./95/test/nosubpools/binary_trees_ada95.gpr",
+                       "./95/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./95/test/test_dynamic_pools_ada95.gpr",
+                       "./95/test/test_bounded_dynamic_pools_ada95.gpr",
+                       "./95/test/nosubpools/bounded_binary_trees_ada95.gpr",
+                       "./95/test/nosubpools/binary_trees_ada95.gpr",
+                       "./95/deepend_lib.gpr");
+               end case;
+               
+            when "Subpools" =>
+               case Bounds is
+
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./95/test/subpools/bounded_binary_trees_ada95.gpr",
+                       "./95/test/test_bounded_dynamic_pools_ada95.gpr",
+                       "./95/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./95/test/subpools/binary_trees_ada95.gpr",
+                       "./95/test/test_dynamic_pools_ada95.gpr",
+                       "./95/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./95/test/subpools/bounded_binary_trees_ada95.gpr",
+                       "./95/test/subpools/binary_trees_ada95.gpr",
+                       "./95/test/test_dynamic_pools_ada95.gpr",
+                       "./95/test/test_bounded_dynamic_pools_ada95.gpr",
+                       "./95/deepend_lib.gpr");
+               end case;
+
+            when "All" =>
+               case Bounds is
+
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./95/test/subpools/bounded_binary_trees_ada95.gpr",
+                       "./95/test/test_bounded_dynamic_pools_ada95.gpr",
+                       "./95/test/nosubpools/bounded_binary_trees_ada95.gpr",
+                       "./95/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./95/test/subpools/binary_trees_ada95.gpr",
+                       "./95/test/test_dynamic_pools_ada95.gpr",
+                       "./95/test/nosubpools/binary_trees_ada95.gpr",
+                       "./95/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./95/test/subpools/bounded_binary_trees_ada95.gpr",
+                       "./95/test/subpools/binary_trees_ada95.gpr",
+                       "./95/test/test_dynamic_pools_ada95.gpr",
+                       "./95/test/test_bounded_dynamic_pools_ada95.gpr",
+                       "./95/test/nosubpools/bounded_binary_trees_ada95.gpr",
+                       "./95/test/nosubpools/binary_trees_ada95.gpr",
+                       "./95/deepend_lib.gpr");
+               end case;                        
+         end case;
+           
       when "Ada2005" =>
-         for Source_Dirs use ("2005/src");
+         case Variant is
+
+            when "Basic" =>
+               case Bounds is
+
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./2005/test/test_bounded_dynamic_pools_ada2005.gpr",
+                       "./2005/test/nosubpools/bounded_binary_trees_ada2005.gpr",
+                       "./2005/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./2005/test/test_dynamic_pools_ada2005.gpr",
+                       "./2005/test/nosubpools/binary_trees_ada2005.gpr",
+                       "./2005/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./2005/test/test_bounded_dynamic_pools_ada2005.gpr",
+                       "./2005/test/test_dynamic_pools_ada2005.gpr",
+                       "./2005/test/nosubpools/bounded_binary_trees_ada2005.gpr",
+                       "./2005/test/nosubpools/binary_trees_ada2005.gpr",
+                       "./2005/deepend_lib.gpr");
+               end case;
+
+            when "Subpools" =>
+               case Bounds is
+
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./2005/test/subpools/bounded_binary_trees_ada2005.gpr",
+                       "./2005/test/test_bounded_dynamic_pools_ada2005.gpr",
+                       "./2005/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./2005/test/subpools/binary_trees_ada2005.gpr",
+                       "./2005/test/test_dynamic_pools_ada2005.gpr",
+                       "./2005/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./2005/test/subpools/bounded_binary_trees_ada2005.gpr",
+                       "./2005/test/subpools/binary_trees_ada2005.gpr",
+                       "./2005/test/test_bounded_dynamic_pools_ada2005.gpr",
+                       "./2005/test/test_dynamic_pools_ada2005.gpr",
+                       "./2005/deepend_lib.gpr");
+               end case;
+
+            when "All" =>
+               case Bounds is
+
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./2005/test/subpools/bounded_binary_trees_ada2005.gpr",
+                       "./2005/test/test_bounded_dynamic_pools_ada2005.gpr",
+                       "./2005/test/nosubpools/bounded_binary_trees_ada2005.gpr",
+                       "./2005/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./2005/test/subpools/binary_trees_ada2005.gpr",
+                       "./2005/test/test_dynamic_pools_ada2005.gpr",
+                       "./2005/test/nosubpools/binary_trees_ada2005.gpr",
+                       "./2005/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./2005/test/subpools/bounded_binary_trees_ada2005.gpr",
+                       "./2005/test/subpools/binary_trees_ada2005.gpr",
+                       "./2005/test/test_bounded_dynamic_pools_ada2005.gpr",
+                       "./2005/test/test_dynamic_pools_ada2005.gpr",
+                       "./2005/test/nosubpools/bounded_binary_trees_ada2005.gpr",
+                       "./2005/test/nosubpools/binary_trees_ada2005.gpr",
+                       "./2005/deepend_lib.gpr");
+               end case;
+         end case;
 
       when "Ada2012" =>
-         for Source_Dirs use ("2012/src");
+         case Variant is
+            when "Basic" =>
+               case Bounds is
+
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./2012/test/test_bounded_dynamic_pools_ada2012.gpr",
+                       "./2012/test/nosubpools/bounded_binary_trees_ada2012.gpr",
+                       "./2012/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./2012/test/test_dynamic_pools_ada2012.gpr",
+                       "./2012/test/nosubpools/binary_trees_ada2012.gpr",
+                       "./2012/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./2012/test/test_bounded_dynamic_pools_ada2012.gpr",
+                       "./2012/test/test_dynamic_pools_ada2012.gpr",
+                       "./2012/test/nosubpools/bounded_binary_trees_ada2012.gpr",
+                       "./2012/test/nosubpools/binary_trees_ada2012.gpr",
+                       "./2012/deepend_lib.gpr");
+               end case;
+
+            when "Subpools" =>
+               case Bounds is
+
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./2012/test/subpools/bounded_binary_trees_ada2012.gpr",
+                       "./2012/test/test_bounded_dynamic_pools_ada2012.gpr",
+                       "./2012/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./2012/test/subpools/binary_trees_ada2012.gpr",
+                       "./2012/test/test_dynamic_pools_ada2012.gpr",
+                       "./2012/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./2012/test/subpools/bounded_binary_trees_ada2012.gpr",
+                       "./2012/test/subpools/binary_trees_ada2012.gpr",
+                       "./2012/test/test_bounded_dynamic_pools_ada2012.gpr",
+                       "./2012/test/test_dynamic_pools_ada2012.gpr",
+                       "./2012/deepend_lib.gpr");
+               end case;
+
+            when "All" =>
+               case Bounds is
+
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./2012/test/subpools/bounded_binary_trees_ada2012.gpr",
+                       "./2012/test/test_bounded_dynamic_pools_ada2012.gpr",
+                       "./2012/test/nosubpools/bounded_binary_trees_ada2012.gpr",
+                       "./2012/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./2012/test/subpools/binary_trees_ada2012.gpr",
+                       "./2012/test/test_dynamic_pools_ada2012.gpr",
+                       "./2012/test/nosubpools/binary_trees_ada2012.gpr",
+                       "./2012/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./2012/test/subpools/bounded_binary_trees_ada2012.gpr",
+                       "./2012/test/subpools/binary_trees_ada2012.gpr",
+                       "./2012/test/test_bounded_dynamic_pools_ada2012.gpr",
+                       "./2012/test/test_dynamic_pools_ada2012.gpr",
+                       "./2012/test/nosubpools/bounded_binary_trees_ada2012.gpr",
+                       "./2012/test/nosubpools/binary_trees_ada2012.gpr",
+                       "./2012/deepend_lib.gpr");
+               end case;
+         end case;
 
       when "Ada2022" =>
-         for Source_Dirs use ("2022/src");
+         case Variant is
+            when "Basic" =>
+               case Bounds is
+
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./2022/test/test_bounded_dynamic_pools_ada2022.gpr",
+                       "./2022/test/nosubpools/bounded_binary_trees_ada2022.gpr",
+                       "./2022/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./2022/test/test_dynamic_pools_ada2022.gpr",
+                       "./2022/test/nosubpools/binary_trees_ada2022.gpr",
+                       "./2022/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./2022/test/test_bounded_dynamic_pools_ada2022.gpr",
+                       "./2022/test/test_dynamic_pools_ada2022.gpr",
+                       "./2022/test/nosubpools/bounded_binary_trees_ada2022.gpr",
+                       "./2022/test/nosubpools/binary_trees_ada2022.gpr",
+                       "./2022/deepend_lib.gpr");
+               end case;
+
+            when "Subpools" =>
+               case Bounds is
+
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./2022/test/subpools/bounded_binary_trees_ada2022.gpr",
+                       "./2022/test/test_bounded_dynamic_pools_ada2022.gpr",
+                       "./2022/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./2022/test/subpools/binary_trees_ada2022.gpr",
+                       "./2022/test/test_dynamic_pools_ada2022.gpr",
+                       "./2022/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./2022/test/subpools/bounded_binary_trees_ada2022.gpr",
+                       "./2022/test/subpools/binary_trees_ada2022.gpr",
+                       "./2022/test/test_bounded_dynamic_pools_ada2022.gpr",
+                       "./2022/test/test_dynamic_pools_ada2022.gpr",
+                       "./2022/deepend_lib.gpr");
+               end case;
+
+            when "All" =>
+               case Bounds is
+
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./2022/test/subpools/bounded_binary_trees_ada2022.gpr",
+                       "./2022/test/test_bounded_dynamic_pools_ada2022.gpr",
+                       "./2022/test/nosubpools/bounded_binary_trees_ada2022.gpr",
+                       "./2022/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./2022/test/subpools/binary_trees_ada2022.gpr",
+                       "./2022/test/test_dynamic_pools_ada2022.gpr",
+                       "./2022/test/nosubpools/binary_trees_ada2022.gpr",
+                       "./2022/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./2022/test/subpools/bounded_binary_trees_ada2022.gpr",
+                       "./2022/test/subpools/binary_trees_ada2022.gpr",
+                       "./2022/test/test_bounded_dynamic_pools_ada2022.gpr",
+                       "./2022/test/test_dynamic_pools_ada2022.gpr",
+                       "./2022/test/nosubpools/bounded_binary_trees_ada2022.gpr",
+                       "./2022/test/nosubpools/binary_trees_ada2022.gpr",
+                       "./2022/deepend_lib.gpr");
+               end case;
+            end case;
+
+      when "All" =>
+         case Variant is
+            when "Basic" =>
+               case Bounds is
+
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./2022/test/test_bounded_dynamic_pools_ada2022.gpr",
+                       "./2022/test/nosubpools/bounded_binary_trees_ada2022.gpr",
+                       "./2012/test/test_bounded_dynamic_pools_ada2012.gpr",
+                       "./2012/test/nosubpools/bounded_binary_trees_ada2012.gpr",
+                       "./95/test/test_bounded_dynamic_pools_ada95.gpr",
+                       "./95/test/nosubpools/bounded_binary_trees_ada95.gpr",
+                       "./2005/test/test_bounded_dynamic_pools_ada2005.gpr",
+                       "./2005/test/nosubpools/bounded_binary_trees_ada2005.gpr",
+                       "./95/deepend_lib.gpr",
+                       "./2005/deepend_lib.gpr",
+                       "./2012/deepend_lib.gpr",
+                       "./2022/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./2022/test/test_dynamic_pools_ada2022.gpr",
+                       "./2022/test/nosubpools/binary_trees_ada2022.gpr",
+                       "./2012/test/test_dynamic_pools_ada2012.gpr",
+                       "./2012/test/nosubpools/binary_trees_ada2012.gpr",
+                       "./95/test/test_dynamic_pools_ada95.gpr",
+                       "./95/test/nosubpools/binary_trees_ada95.gpr",
+                       "./2005/test/test_dynamic_pools_ada2005.gpr",
+                       "./2005/test/nosubpools/binary_trees_ada2005.gpr",
+                       "./95/deepend_lib.gpr",
+                       "./2005/deepend_lib.gpr",
+                       "./2012/deepend_lib.gpr",
+                       "./2022/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./2022/test/test_bounded_dynamic_pools_ada2022.gpr",
+                       "./2022/test/test_dynamic_pools_ada2022.gpr",
+                       "./2022/test/nosubpools/bounded_binary_trees_ada2022.gpr",
+                       "./2022/test/nosubpools/binary_trees_ada2022.gpr",
+                       "./2012/test/test_bounded_dynamic_pools_ada2012.gpr",
+                       "./2012/test/test_dynamic_pools_ada2012.gpr",
+                       "./2012/test/nosubpools/bounded_binary_trees_ada2012.gpr",
+                       "./2012/test/nosubpools/binary_trees_ada2012.gpr",
+                       "./95/test/test_dynamic_pools_ada95.gpr",
+                       "./95/test/test_bounded_dynamic_pools_ada95.gpr",
+                       "./95/test/nosubpools/bounded_binary_trees_ada95.gpr",
+                       "./95/test/nosubpools/binary_trees_ada95.gpr",
+                       "./2005/test/test_bounded_dynamic_pools_ada2005.gpr",
+                       "./2005/test/test_dynamic_pools_ada2005.gpr",
+                       "./2005/test/nosubpools/bounded_binary_trees_ada2005.gpr",
+                       "./2005/test/nosubpools/binary_trees_ada2005.gpr",
+                       "./95/deepend_lib.gpr",
+                       "./2005/deepend_lib.gpr",
+                       "./2012/deepend_lib.gpr",
+                       "./2022/deepend_lib.gpr");
+               end case;
+
+            when "Subpools" =>
+               case Bounds is
+
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./2022/test/subpools/bounded_binary_trees_ada2022.gpr",
+                       "./2022/test/test_bounded_dynamic_pools_ada2022.gpr",
+                       "./2012/test/subpools/bounded_binary_trees_ada2012.gpr",
+                       "./2012/test/test_bounded_dynamic_pools_ada2012.gpr",
+                       "./95/test/subpools/bounded_binary_trees_ada95.gpr",
+                       "./95/test/test_bounded_dynamic_pools_ada95.gpr",
+                       "./2005/test/subpools/bounded_binary_trees_ada2005.gpr",
+                       "./2005/test/test_bounded_dynamic_pools_ada2005.gpr",
+                       "./95/deepend_lib.gpr",
+                       "./2005/deepend_lib.gpr",
+                       "./2012/deepend_lib.gpr",
+                       "./2022/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./2022/test/subpools/binary_trees_ada2022.gpr",
+                       "./2022/test/test_dynamic_pools_ada2022.gpr",
+                       "./2012/test/subpools/binary_trees_ada2012.gpr",
+                       "./2012/test/test_dynamic_pools_ada2012.gpr",
+                       "./95/test/subpools/binary_trees_ada95.gpr",
+                       "./95/test/test_dynamic_pools_ada95.gpr",
+                       "./2005/test/subpools/binary_trees_ada2005.gpr",
+                       "./2005/test/test_dynamic_pools_ada2005.gpr",
+                       "./95/deepend_lib.gpr",
+                       "./2005/deepend_lib.gpr",
+                       "./2012/deepend_lib.gpr",
+                       "./2022/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./2022/test/subpools/bounded_binary_trees_ada2022.gpr",
+                       "./2022/test/subpools/binary_trees_ada2022.gpr",
+                       "./2022/test/test_bounded_dynamic_pools_ada2022.gpr",
+                       "./2022/test/test_dynamic_pools_ada2022.gpr",
+                       "./2012/test/subpools/bounded_binary_trees_ada2012.gpr",
+                       "./2012/test/subpools/binary_trees_ada2012.gpr",
+                       "./2012/test/test_bounded_dynamic_pools_ada2012.gpr",
+                       "./2012/test/test_dynamic_pools_ada2012.gpr",
+                       "./95/test/subpools/bounded_binary_trees_ada95.gpr",
+                       "./95/test/subpools/binary_trees_ada95.gpr",
+                       "./95/test/test_dynamic_pools_ada95.gpr",
+                       "./95/test/test_bounded_dynamic_pools_ada95.gpr",
+                       "./2005/test/subpools/bounded_binary_trees_ada2005.gpr",
+                       "./2005/test/subpools/binary_trees_ada2005.gpr",
+                       "./2005/test/test_bounded_dynamic_pools_ada2005.gpr",
+                       "./2005/test/test_dynamic_pools_ada2005.gpr",
+                       "./95/deepend_lib.gpr",
+                       "./2005/deepend_lib.gpr",
+                       "./2012/deepend_lib.gpr",
+                       "./2022/deepend_lib.gpr");
+               end case;
+
+            when "All" =>
+               case Bounds is
+
+                  when "Bounded" =>
+                     for Project_Files use (
+                       "./2022/test/subpools/bounded_binary_trees_ada2022.gpr",
+                       "./2022/test/test_bounded_dynamic_pools_ada2022.gpr",
+                       "./2022/test/nosubpools/bounded_binary_trees_ada2022.gpr",
+                       "./2012/test/subpools/bounded_binary_trees_ada2012.gpr",
+                       "./2012/test/test_bounded_dynamic_pools_ada2012.gpr",
+                       "./2012/test/nosubpools/bounded_binary_trees_ada2012.gpr",
+                       "./95/test/subpools/bounded_binary_trees_ada95.gpr",
+                       "./95/test/test_bounded_dynamic_pools_ada95.gpr",
+                       "./95/test/nosubpools/bounded_binary_trees_ada95.gpr",
+                       "./2005/test/subpools/bounded_binary_trees_ada2005.gpr",
+                       "./2005/test/test_bounded_dynamic_pools_ada2005.gpr",
+                       "./2005/test/nosubpools/bounded_binary_trees_ada2005.gpr",
+                       "./95/deepend_lib.gpr",
+                       "./2005/deepend_lib.gpr",
+                       "./2012/deepend_lib.gpr",
+                       "./2022/deepend_lib.gpr");
+
+                  when "Unbounded" =>
+                     for Project_Files use (
+                       "./2022/test/subpools/binary_trees_ada2022.gpr",
+                       "./2022/test/test_dynamic_pools_ada2022.gpr",
+                       "./2022/test/nosubpools/binary_trees_ada2022.gpr",
+                       "./2012/test/subpools/binary_trees_ada2012.gpr",
+                       "./2012/test/test_dynamic_pools_ada2012.gpr",
+                       "./2012/test/nosubpools/binary_trees_ada2012.gpr",
+                       "./95/test/subpools/binary_trees_ada95.gpr",
+                       "./95/test/test_dynamic_pools_ada95.gpr",
+                       "./95/test/nosubpools/binary_trees_ada95.gpr",
+                       "./2005/test/subpools/binary_trees_ada2005.gpr",
+                       "./2005/test/test_dynamic_pools_ada2005.gpr",
+                       "./2005/test/nosubpools/binary_trees_ada2005.gpr",
+                       "./95/deepend_lib.gpr",
+                       "./2005/deepend_lib.gpr",
+                       "./2012/deepend_lib.gpr",
+                       "./2022/deepend_lib.gpr");
+
+                  when "All" =>
+                     for Project_Files use (
+                       "./2022/test/subpools/bounded_binary_trees_ada2022.gpr",
+                       "./2022/test/subpools/binary_trees_ada2022.gpr",
+                       "./2022/test/test_bounded_dynamic_pools_ada2022.gpr",
+                       "./2022/test/test_dynamic_pools_ada2022.gpr",
+                       "./2022/test/nosubpools/bounded_binary_trees_ada2022.gpr",
+                       "./2022/test/nosubpools/binary_trees_ada2022.gpr",
+                       "./2012/test/subpools/bounded_binary_trees_ada2012.gpr",
+                       "./2012/test/subpools/binary_trees_ada2012.gpr",
+                       "./2012/test/test_bounded_dynamic_pools_ada2012.gpr",
+                       "./2012/test/test_dynamic_pools_ada2012.gpr",
+                       "./2012/test/nosubpools/bounded_binary_trees_ada2012.gpr",
+                       "./2012/test/nosubpools/binary_trees_ada2012.gpr",
+                       "./95/test/subpools/bounded_binary_trees_ada95.gpr",
+                       "./95/test/subpools/binary_trees_ada95.gpr",
+                       "./95/test/test_dynamic_pools_ada95.gpr",
+                       "./95/test/test_bounded_dynamic_pools_ada95.gpr",
+                       "./95/test/nosubpools/bounded_binary_trees_ada95.gpr",
+                       "./95/test/nosubpools/binary_trees_ada95.gpr",
+                       "./2005/test/subpools/bounded_binary_trees_ada2005.gpr",
+                       "./2005/test/subpools/binary_trees_ada2005.gpr",
+                       "./2005/test/test_bounded_dynamic_pools_ada2005.gpr",
+                       "./2005/test/test_dynamic_pools_ada2005.gpr",
+                       "./2005/test/nosubpools/bounded_binary_trees_ada2005.gpr",
+                       "./2005/test/nosubpools/binary_trees_ada2005.gpr",
+                       "./95/deepend_lib.gpr",
+                       "./2005/deepend_lib.gpr",
+                       "./2012/deepend_lib.gpr",
+                       "./2022/deepend_lib.gpr");
+               end case;
+         end case;      
    end case;
 
-   package Compiler is
-      case Ada_Version is
-         when "Ada95" =>
-             for Switches ("ada") use ("-gnatf", "-gnata", "-gnat95", "-gnatwa.f.g.kh.o_p_q.w", "-gnatyaAbBcdDefhiIklM79noOprStuxz");
-         when "Ada2005" =>
-             for Switches ("ada") use ("-gnatf", "-gnata", "-gnat2005", "-gnatwa.f.g.kh.o_p_q.w", "-gnatyaAbBcdDefhiIklM79noOprStuxz");
-         when "Ada2012" =>
-             for Switches ("ada") use ("-gnatf", "-gnata", "-gnat2012", "-gnatwa.f.g.kh.o_p_q.w", "-gnatyaAbBcdDefhiIklM79noOprStuxz");
-         when "Ada2022" =>
-             for Switches ("ada") use ("-gnatf", "-gnata", "-gnat2022", "-gnatwa.f.g.kh.o_p_q.w", "-gnatyaAbBcdDefhiIklM79noOprStuxz");
-      end case;
-   end Compiler;
-
 end Deepend;
-

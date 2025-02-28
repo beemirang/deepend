@@ -237,7 +237,7 @@ begin --  Test_Dynamic_Pools_Ada95
                      Storage_Elements.Storage_Count'Image
                      (Storage_Used (Pool)));
 
-      end;
+      end Nested_Scoped_Subpool_Test;
 
       Put_Line ("Bytes Stored After Finalization=" &
                   Storage_Elements.Storage_Count'Image

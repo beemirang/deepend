@@ -256,7 +256,6 @@ begin --  Test_Dynamic_Pools_Ada2005
         (Dynamic_Pools.Storage_Used
            (Subpool => Pool.Default_Subpool_For_Pool)));
 
-   pragma Warnings (Off, "*Object*is assigned but never read*");
    declare
       Object : O_Access;
       Id     : Id_String_Access;
@@ -290,7 +289,6 @@ begin --  Test_Dynamic_Pools_Ada2005
            (Dynamic_Pools.Storage_Used
               (Subpool => Pool.Default_Subpool_For_Pool)));
    end;
-   pragma Warnings (On, "*Object*is assigned but never read*");
 
    Put_Line ("Deallocating Default Subpool again");
 
