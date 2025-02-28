@@ -6,6 +6,7 @@ deepend-3.13 (Current Version)
 - Restructured folder names, and added project to build as a library
 - Address compiler warnings
 - Added tests for memory alignment
+- deepend.gpr builds everything including library
 
 deepend-3.12
 - Updated copyright headers
