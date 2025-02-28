@@ -10,14 +10,5 @@ website = "https://github.com/beemirang/deepend"
 tags = ["ada", "memory", "storage-pools", "subpools"]
 project-files = ["deepend.gpr"]
 
-executables = ["test_dynamic_pools_ada2012",
-               "test_dynamic_pools_ada2022",
-               "test_bounded_dynamic_pools_ada2012",
-               "binary_trees_basic_pool_ada2012",
-               "binary_trees_basic_pool_ada2022",
-               "binary_trees_basic_bounded_pool_ada2012",
-               "binary_trees_basic_bounded_pool_ada2022",
-               "binary_trees_with_subpools_ada2012",
-               "binary_trees_with_subpools_ada2022",
-               "binary_trees_with_bounded_subpools_ada2012",
-               "binary_trees_with_bounded_subpools_ada2022"]
+executables = ["test_bounded_dynamic_pools_ada2012",
+               "binary_trees_with_bounded_subpools_ada2012"]
