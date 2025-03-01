@@ -5,15 +5,15 @@ aggregate project Deepend is
 
    type Ada_Standard is
       ("Ada95", "Ada2005", "Ada2012", "Ada2022", "All");
-   Ada_Version : Ada_Standard := external ("DEEPEND_ADA_STANDARD", "Ada2012");
+   Ada_Version : Ada_Standard := external ("DEEPEND_ADA_STANDARD", "All");
 
    type Pool_Variant is
       ("Basic", "Subpools", "All");
-   Variant : Pool_Variant := external ("DEEPEND_POOL_VARIANT", "Subpools");
+   Variant : Pool_Variant := external ("DEEPEND_POOL_VARIANT", "All");
 
    type Storage_Bounds is
       ("Bounded", "Unbounded", "All");
-   Bounds : Storage_Bounds := external ("DEEPEND_STORAGE_BOUNDS", "Bounded");
+   Bounds : Storage_Bounds := external ("DEEPEND_STORAGE_BOUNDS", "All");
 
    package Builder is
      for Switches (others) use ("-jc1", "-jb0", "-jl0");
